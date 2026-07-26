@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="EntreHoras"
-run/main_scene="uid://d14t3mb4ea64f"
+run/main_scene="uid://xy5emt7x440e"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://sprites/icon.svg"
 

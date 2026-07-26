@@ -353,13 +353,32 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_22nsn"]
+size = Vector2(11, 5)
+
 [node name="Player" type="CharacterBody2D" unique_id=76362413]
 script = ExtResource("1_unwft")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=164958475]
-
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=67362584]
+y_sort_enabled = true
+scale = Vector2(1.4, 1.4)
 sprite_frames = SubResource("SpriteFrames_mlllq")
 animation = &"idle_front"
 autoplay = "idle_front"
 frame_progress = 0.26181036
+offset = Vector2(0, -18)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=164958475]
+y_sort_enabled = true
+position = Vector2(0, -1)
+shape = SubResource("RectangleShape2D_22nsn")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=274636579]
+zoom = Vector2(0.5, 0.5)
+limit_left = 0
+limit_top = 0
+limit_right = 1150
+limit_bottom = 650
+limit_smoothed = true
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
