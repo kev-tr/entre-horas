@@ -1,0 +1,107 @@
+[gd_scene format=3 uid="uid://c8h38tb736ccc"]
+
+[ext_resource type="Texture2D" path="res://sprites/buildings/Hospital/Hospital_building.png" id="1_hosp"]
+[ext_resource type="Texture2D" path="res://sprites/buildings/Company/company-building.png" id="2_comp"]
+[ext_resource type="Texture2D" path="res://sprites/buildings/Chale/chale-building.png" id="3_chale"]
+[ext_resource type="Texture2D" path="res://sprites/buildings/Angar/angar-building.png" id="4_angar"]
+[ext_resource type="Texture2D" path="res://sprites/buildings/Library/library-building.png" id="5_lib"]
+[ext_resource type="Texture2D" path="res://sprites/buildings/Bank/bank-building.png" id="6_bank"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hosp"]
+size = Vector2(120, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_comp"]
+size = Vector2(90, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_chale"]
+size = Vector2(80, 36)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_angar"]
+size = Vector2(80, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lib"]
+size = Vector2(140, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bank"]
+size = Vector2(120, 40)
+
+[node name="Estruturas" type="Node2D"]
+y_sort_enabled = true
+
+[node name="Hospital" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(144, 216)
+
+[node name="Sprite" type="Sprite2D" parent="Hospital"]
+y_sort_enabled = true
+texture = ExtResource("1_hosp")
+offset = Vector2(0, -139)
+
+[node name="Collision" type="CollisionShape2D" parent="Hospital"]
+position = Vector2(0, -24)
+shape = SubResource("RectangleShape2D_hosp")
+
+[node name="Company" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(144, 520)
+
+[node name="Sprite" type="Sprite2D" parent="Company"]
+y_sort_enabled = true
+texture = ExtResource("2_comp")
+offset = Vector2(0, -100)
+
+[node name="Collision" type="CollisionShape2D" parent="Company"]
+position = Vector2(0, -20)
+shape = SubResource("RectangleShape2D_comp")
+
+[node name="Chale" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(144, 848)
+
+[node name="Sprite" type="Sprite2D" parent="Chale"]
+y_sort_enabled = true
+texture = ExtResource("3_chale")
+offset = Vector2(0, -56)
+
+[node name="Collision" type="CollisionShape2D" parent="Chale"]
+position = Vector2(0, -18)
+shape = SubResource("RectangleShape2D_chale")
+
+[node name="Angar" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(560, 216)
+
+[node name="Sprite" type="Sprite2D" parent="Angar"]
+y_sort_enabled = true
+texture = ExtResource("4_angar")
+offset = Vector2(0, -64)
+
+[node name="Collision" type="CollisionShape2D" parent="Angar"]
+position = Vector2(0, -20)
+shape = SubResource("RectangleShape2D_angar")
+
+[node name="Library" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(560, 520)
+
+[node name="Sprite" type="Sprite2D" parent="Library"]
+y_sort_enabled = true
+texture = ExtResource("5_lib")
+offset = Vector2(0, -140)
+
+[node name="Collision" type="CollisionShape2D" parent="Library"]
+position = Vector2(0, -24)
+shape = SubResource("RectangleShape2D_lib")
+
+[node name="Bank" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(560, 848)
+
+[node name="Sprite" type="Sprite2D" parent="Bank"]
+y_sort_enabled = true
+texture = ExtResource("6_bank")
+offset = Vector2(0, -64)
+
+[node name="Collision" type="CollisionShape2D" parent="Bank"]
+position = Vector2(0, -20)
+shape = SubResource("RectangleShape2D_bank")

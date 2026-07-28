@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://co6nv7tvyuh1p"
-path="res://.godot/imported/Bank.png-02085def1dad70d2db028ebeef9216b7.ctex"
+uid="uid://euv2d3bj3mbx"
+path="res://.godot/imported/icone-saude-mental.png-465583f9bd98cc96319335813c7aaed0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/buildings/Bank/Bank.png"
-dest_files=["res://.godot/imported/Bank.png-02085def1dad70d2db028ebeef9216b7.ctex"]
+source_file="res://sprites/hud/icone-saude-mental.png"
+dest_files=["res://.godot/imported/icone-saude-mental.png-465583f9bd98cc96319335813c7aaed0.ctex"]
 
 [params]
 

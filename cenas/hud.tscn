@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://bu1rcle2j0gyu"]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+[ext_resource type="Texture2D" path="res://sprites/hud/icone-produtividade.png" id="2_prod"]
+[ext_resource type="Texture2D" path="res://sprites/hud/icone-energia.png" id="3_ener"]
+[ext_resource type="Texture2D" path="res://sprites/hud/icone-saude-mental.png" id="4_saude"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_painel"]
+bg_color = Color(0.12, 0.1, 0.08, 0.94)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.72, 0.58, 0.38, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 10
+content_margin_top = 8
+content_margin_right = 10
+content_margin_bottom = 8
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="PainelAtributos" type="PanelContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -292.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 148.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_painel")
+
+[node name="VBox" type="VBoxContainer" parent="PainelAtributos"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LinhaProdutividade" type="HBoxContainer" parent="PainelAtributos/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IconeProdutividade" type="TextureRect" parent="PainelAtributos/VBox/LinhaProdutividade"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("2_prod")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ColunaProdutividade" type="VBoxContainer" parent="PainelAtributos/VBox/LinhaProdutividade"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="CabecalhoProdutividade" type="HBoxContainer" parent="PainelAtributos/VBox/LinhaProdutividade/ColunaProdutividade"]
+layout_mode = 2
+
+[node name="LabelProdutividade" type="Label" parent="PainelAtributos/VBox/LinhaProdutividade/ColunaProdutividade/CabecalhoProdutividade"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "PRODUTIVIDADE"
+
+[node name="ValorProdutividade" type="Label" parent="PainelAtributos/VBox/LinhaProdutividade/ColunaProdutividade/CabecalhoProdutividade"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "5/10"
+horizontal_alignment = 2
+
+[node name="SegmentosProdutividade" type="HBoxContainer" parent="PainelAtributos/VBox/LinhaProdutividade/ColunaProdutividade"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="LinhaEnergia" type="HBoxContainer" parent="PainelAtributos/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IconeEnergia" type="TextureRect" parent="PainelAtributos/VBox/LinhaEnergia"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("3_ener")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ColunaEnergia" type="VBoxContainer" parent="PainelAtributos/VBox/LinhaEnergia"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="CabecalhoEnergia" type="HBoxContainer" parent="PainelAtributos/VBox/LinhaEnergia/ColunaEnergia"]
+layout_mode = 2
+
+[node name="LabelEnergia" type="Label" parent="PainelAtributos/VBox/LinhaEnergia/ColunaEnergia/CabecalhoEnergia"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "ENERGIA"
+
+[node name="ValorEnergia" type="Label" parent="PainelAtributos/VBox/LinhaEnergia/ColunaEnergia/CabecalhoEnergia"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "8/10"
+horizontal_alignment = 2
+
+[node name="SegmentosEnergia" type="HBoxContainer" parent="PainelAtributos/VBox/LinhaEnergia/ColunaEnergia"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="LinhaSaudeMental" type="HBoxContainer" parent="PainelAtributos/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IconeSaudeMental" type="TextureRect" parent="PainelAtributos/VBox/LinhaSaudeMental"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("4_saude")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ColunaSaudeMental" type="VBoxContainer" parent="PainelAtributos/VBox/LinhaSaudeMental"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="CabecalhoSaudeMental" type="HBoxContainer" parent="PainelAtributos/VBox/LinhaSaudeMental/ColunaSaudeMental"]
+layout_mode = 2
+
+[node name="LabelSaudeMental" type="Label" parent="PainelAtributos/VBox/LinhaSaudeMental/ColunaSaudeMental/CabecalhoSaudeMental"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "SAÚDE MENTAL"
+
+[node name="ValorSaudeMental" type="Label" parent="PainelAtributos/VBox/LinhaSaudeMental/ColunaSaudeMental/CabecalhoSaudeMental"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "7/10"
+horizontal_alignment = 2
+
+[node name="SegmentosSaudeMental" type="HBoxContainer" parent="PainelAtributos/VBox/LinhaSaudeMental/ColunaSaudeMental"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_constants/separation = 2

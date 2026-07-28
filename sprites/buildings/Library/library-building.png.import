@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://da7hisahb2iev"
-path="res://.godot/imported/angar3_blue.png-ccec96983953ce2d70cac4ed604e980f.ctex"
+uid="uid://bqhof4omrns0y"
+path="res://.godot/imported/library-building.png-3e7d178c31aa5af619be152d5452ad7c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/buildings/Angar/angar3_blue.png"
-dest_files=["res://.godot/imported/angar3_blue.png-ccec96983953ce2d70cac4ed604e980f.ctex"]
+source_file="res://sprites/buildings/Library/library-building.png"
+dest_files=["res://.godot/imported/library-building.png-3e7d178c31aa5af619be152d5452ad7c.ctex"]
 
 [params]
 

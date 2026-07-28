@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 const SPEED = 100.0
 const JUMP_VELOCITY = -400.0
+const MAX_ATRIBUTO := 10.0
 
 signal atributos_alterados(
 	produtividade: float,
@@ -11,9 +12,9 @@ signal atributos_alterados(
 )
 
 @export_category("Atributos")
-@export_range(0.0, 100.0, 1.0) var produtividade: float = 20.0
-@export_range(0.0, 100.0, 1.0) var energia: float = 100.0
-@export_range(0.0, 100.0, 1.0) var saude_mental: float = 80.0
+@export_range(0.0, 10.0, 1.0) var produtividade: float = 5.0
+@export_range(0.0, 10.0, 1.0) var energia: float = 8.0
+@export_range(0.0, 10.0, 1.0) var saude_mental: float = 7.0
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -24,30 +25,30 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	player_movement(delta)
-	
+
 	if Input.is_action_just_pressed("ui_accept"):
-		atualizar_atributos(10, -10, -5)
-	
+		atualizar_atributos(1, -1, -1)
+
 func player_movement(delta: float) -> void:
-	
+
 	if Input.is_action_pressed("ui_right"):
 		direcao = "right"
 		animacao(1)
 		velocity.x = SPEED
 		velocity.y = 0
-		
+
 	elif Input.is_action_pressed("ui_left"):
 		direcao = "left"
 		animacao(1)
 		velocity.x = -SPEED
 		velocity.y = 0
-	
+
 	elif Input.is_action_pressed("ui_up"):
 		direcao = "up"
 		animacao(1)
 		velocity.x = 0
 		velocity.y = -SPEED
-		
+
 	elif Input.is_action_pressed("ui_down"):
 		direcao = "down"
 		animacao(1)
@@ -57,7 +58,7 @@ func player_movement(delta: float) -> void:
 		animacao(0)
 		velocity.x = 0
 		velocity.y = 0
-	
+
 	move_and_slide()
 
 func atualizar_atributos(
@@ -69,30 +70,30 @@ func atualizar_atributos(
 	produtividade = clamp(
 		produtividade + delta_produtividade,
 		0.0,
-		100.0
+		MAX_ATRIBUTO
 	)
 
 	energia = clamp(
 		energia + delta_energia,
 		0.0,
-		100.0
+		MAX_ATRIBUTO
 	)
 
 	saude_mental = clamp(
 		saude_mental + delta_saude_mental,
 		0.0,
-		100.0
+		MAX_ATRIBUTO
 	)
 
 	emitir_atributos()
-	
+
 func emitir_atributos() -> void:
 	print(
 	"Produtividade: ", produtividade,
 	" | Energia: ", energia,
 	" | Saúde mental: ", saude_mental
 	)
-	
+
 	atributos_alterados.emit(
 		produtividade,
 		energia,
@@ -101,28 +102,28 @@ func emitir_atributos() -> void:
 
 func animacao(mov):
 	var dir_atual = direcao
-	
+
 	if direcao == "right":
 		animated_sprite_2d.flip_h = false
 		if mov == 1:
 			animated_sprite_2d.play("walk_side")
 		elif mov == 0:
 			animated_sprite_2d.play("idle_side")
-	
+
 	if direcao == "left":
 		animated_sprite_2d.flip_h = true
 		if mov == 1:
 			animated_sprite_2d.play("walk_side")
 		elif mov == 0:
 			animated_sprite_2d.play("idle_side")
-	
+
 	if direcao == "up":
 		animated_sprite_2d.flip_h = false
 		if mov == 1:
 			animated_sprite_2d.play("walk_back")
 		elif mov == 0:
 			animated_sprite_2d.play("idle_back")
-	
+
 	if direcao == "down":
 		animated_sprite_2d.flip_h = false
 		if mov == 1:
