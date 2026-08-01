@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://bjpycw8rekpp0"]
+
+[ext_resource type="Script" uid="uid://cqkqh1ofof5hr" path="res://scripts/ponto_interacao.gd" id="1_qaj1u"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mlllq"]
+size = Vector2(32, 16)
+
+[node name="PontoInteracao" type="Area2D" unique_id=1013019802]
+script = ExtResource("1_qaj1u")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1657160523]
+shape = SubResource("RectangleShape2D_mlllq")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_body_exited"]

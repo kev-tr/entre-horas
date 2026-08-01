@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://db61of2hyydk4"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_d4d8e"]
+
+[resource]
+script = ExtResource("1_d4d8e")
+nome = "Dormir"
+energia = 80.0
+saude_mental = 20.0
+duracao_minutos = 480
+tem_restricao_horario = true
+hora_inicio = 20
+duracao_disponibilidade_minutos = 240
+metadata/_custom_type_script = "uid://6can3qouvgtc"

@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 
-const SPEED = 100.0
+const SPEED = 200.0
 const JUMP_VELOCITY = -400.0
 
 signal atributos_alterados(
@@ -16,8 +16,10 @@ signal atributos_alterados(
 @export_range(0.0, 100.0, 1.0) var saude_mental: float = 80.0
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
+@onready var relogio = get_node("../Relogio")
 
 var direcao = "none"
+var ponto_interacao_atual: Area2D = null
 
 func _ready() -> void:
 	emitir_atributos()
@@ -26,7 +28,37 @@ func _physics_process(delta: float) -> void:
 	player_movement(delta)
 	
 	if Input.is_action_just_pressed("ui_accept"):
-		atualizar_atributos(10, -10, -5)
+		if ponto_interacao_atual != null:
+			if ponto_interacao_atual.atividade_atual != null:
+				var atividade = ponto_interacao_atual.atividade_atual
+				
+				if not atividade.esta_disponivel(relogio.minutos_atuais):
+					print("Atividade indisponível neste horário")
+					return
+					
+				print("Realizando atividade: ", atividade.nome)
+
+				atualizar_atributos(
+					atividade.produtividade,
+					atividade.energia,
+					atividade.saude_mental
+				)
+				relogio.avancar_tempo(atividade.duracao_minutos)
+				
+				ponto_interacao_atual.minuto_liberacao_proxima_atividade = (
+					relogio.minutos_atuais
+					+ ponto_interacao_atual.intervalo_minimo_entre_atividades
+				)
+
+				ponto_interacao_atual.atividade_atual = null
+				ponto_interacao_atual.minuto_inicio_atividade = -1.0
+				
+				ponto_interacao_atual.hud.esconder_interacao()
+				
+			else:
+				print("Nenhuma atividade disponível neste local")
+		else:
+			print("Nenhum ponto de interação próximo")
 	
 func player_movement(delta: float) -> void:
 	
