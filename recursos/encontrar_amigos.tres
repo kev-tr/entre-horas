@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://d3hs3gv3n5yyn"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_fm2ox"]
+
+[resource]
+script = ExtResource("1_fm2ox")
+nome = "Encontrar com amigos"
+energia = -5.0
+saude_mental = 15.0
+duracao_minutos = 60
+tem_restricao_horario = true
+hora_inicio = 17
+hora_fim = 22
+duracao_disponibilidade_minutos = 90
+chance_surgimento = 0.4
+metadata/_custom_type_script = "uid://6can3qouvgtc"

@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 
-const MAX_ATRIBUTO := 10
+const MAX_ATRIBUTO := 100
 const SEGMENTOS := 10
 
 const COR_PRODUTIVIDADE := Color("3DCC5A")
@@ -19,11 +19,17 @@ const COR_BORDA_SEGMENTO := Color("1A1814")
 @onready var segmentos_energia: HBoxContainer = $PainelAtributos/VBox/LinhaEnergia/ColunaEnergia/SegmentosEnergia
 @onready var segmentos_saude_mental: HBoxContainer = $PainelAtributos/VBox/LinhaSaudeMental/ColunaSaudeMental/SegmentosSaudeMental
 
+@onready var label_relogio: Label = %LabelRelogio
+
+@onready var painel_interacao = $PainelInteracao
+@onready var label_atividade = $PainelInteracao/VBoxContainer/LabelAtividade
+@onready var label_instrucao = $PainelInteracao/VBoxContainer/LabelInstrucao
+
 
 func _ready() -> void:
-	_montar_segmentos(segmentos_produtividade, COR_PRODUTIVIDADE)
-	_montar_segmentos(segmentos_energia, COR_ENERGIA)
-	_montar_segmentos(segmentos_saude_mental, COR_SAUDE_MENTAL)
+	_montar_segmentos(segmentos_produtividade)
+	_montar_segmentos(segmentos_energia)
+	_montar_segmentos(segmentos_saude_mental)
 
 
 func atualizar_atributos(
@@ -35,20 +41,48 @@ func atualizar_atributos(
 	var e := _normalizar(energia)
 	var s := _normalizar(saude_mental)
 
-	valor_produtividade.text = "%d/%d" % [p, MAX_ATRIBUTO]
-	valor_energia.text = "%d/%d" % [e, MAX_ATRIBUTO]
-	valor_saude_mental.text = "%d/%d" % [s, MAX_ATRIBUTO]
+	valor_produtividade.text = str(p) + " %"
+	valor_energia.text = str(e) + " %"
+	valor_saude_mental.text = str(s) + " %"
 
-	_atualizar_segmentos(segmentos_produtividade, p, COR_PRODUTIVIDADE)
-	_atualizar_segmentos(segmentos_energia, e, COR_ENERGIA)
-	_atualizar_segmentos(segmentos_saude_mental, s, COR_SAUDE_MENTAL)
+	_atualizar_segmentos(
+		segmentos_produtividade,
+		p,
+		COR_PRODUTIVIDADE
+	)
+
+	_atualizar_segmentos(
+		segmentos_energia,
+		e,
+		COR_ENERGIA
+	)
+
+	_atualizar_segmentos(
+		segmentos_saude_mental,
+		s,
+		COR_SAUDE_MENTAL
+	)
+
+
+func atualizar_relogio(horario: String) -> void:
+	label_relogio.text = horario
+
+
+func mostrar_interacao(nome_atividade: String) -> void:
+	label_atividade.text = nome_atividade
+	label_instrucao.text = "Pressione ESPAÇO"
+	painel_interacao.visible = true
+
+
+func esconder_interacao() -> void:
+	painel_interacao.visible = false
 
 
 func _normalizar(valor: float) -> int:
 	return clampi(roundi(valor), 0, MAX_ATRIBUTO)
 
 
-func _montar_segmentos(container: HBoxContainer, _cor_cheia: Color) -> void:
+func _montar_segmentos(container: HBoxContainer) -> void:
 	for filho in container.get_children():
 		filho.queue_free()
 
@@ -56,7 +90,10 @@ func _montar_segmentos(container: HBoxContainer, _cor_cheia: Color) -> void:
 		var segmento := Panel.new()
 		segmento.custom_minimum_size = Vector2(14, 12)
 		segmento.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		segmento.add_theme_stylebox_override("panel", _estilo_segmento(COR_SEGMENTO_VAZIO))
+		segmento.add_theme_stylebox_override(
+			"panel",
+			_estilo_segmento(COR_SEGMENTO_VAZIO)
+		)
 		container.add_child(segmento)
 
 
@@ -65,10 +102,23 @@ func _atualizar_segmentos(
 	valor: int,
 	cor_cheia: Color
 ) -> void:
+	var segmentos_preenchidos := roundi(
+		float(valor) / MAX_ATRIBUTO * SEGMENTOS
+	)
+
 	var filhos := container.get_children()
+
 	for i in filhos.size():
-		var cor := cor_cheia if i < valor else COR_SEGMENTO_VAZIO
-		filhos[i].add_theme_stylebox_override("panel", _estilo_segmento(cor))
+		var cor := (
+			cor_cheia
+			if i < segmentos_preenchidos
+			else COR_SEGMENTO_VAZIO
+		)
+
+		filhos[i].add_theme_stylebox_override(
+			"panel",
+			_estilo_segmento(cor)
+		)
 
 
 func _estilo_segmento(cor: Color) -> StyleBoxFlat:
@@ -77,4 +127,5 @@ func _estilo_segmento(cor: Color) -> StyleBoxFlat:
 	estilo.border_color = COR_BORDA_SEGMENTO
 	estilo.set_border_width_all(1)
 	estilo.set_corner_radius_all(2)
+
 	return estilo
