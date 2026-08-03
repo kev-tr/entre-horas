@@ -124,7 +124,6 @@ func encerrar_dia_por_sono(hora: int) -> void:
 
 func encerrar_dia_automatico() -> void:
 	alterar_atributos(0, 1, 0)
-	avancar_dia("O dia terminou automaticamente. O descanso foi mínimo.")
 
 func avancar_dia(mensagem: String) -> void:
 	if indice_dia == DIAS.size() - 1:

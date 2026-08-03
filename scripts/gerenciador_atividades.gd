@@ -17,7 +17,7 @@ func _ready() -> void:
 	estado.atributos_alterados.connect(func(_p: int, _e: int, _s: int): _atualizar_pontos())
 	relogio.horario_alterado.connect(func(_horario: String): _atualizar_pontos())
 
-func _atualizar_pontos() -> void:
+func _atualizar_pontos(_nome_dia = "", _indice_dia = 0) -> void:
 	var proxima := estado.obter_proxima_tarefa(relogio.minutos_atuais)
 	for ponto in locais.values():
 		ponto.definir_atividades(_atividades_para_local(ponto.tipo_local))

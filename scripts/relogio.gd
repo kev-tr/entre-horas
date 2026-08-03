@@ -5,7 +5,7 @@ signal fim_do_dia_automatico
 
 @export var hora_inicial: int = 8
 @export var hora_final: int = 24
-@export var duracao_dia_real: float = 180.0
+@export var duracao_dia_real: float = 60.0
 
 var minutos_atuais: float
 var ativo := false

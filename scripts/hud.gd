@@ -4,6 +4,7 @@ signal iniciar_solicitado
 signal reiniciar_solicitado
 signal continuar_solicitado
 signal retomar_solicitado
+signal proximo_dia_solicitado
 
 const MAX_ATRIBUTO := 10
 const SEGMENTOS := 10
@@ -27,13 +28,17 @@ const COR_ACENTO := Color("F6C453")
 @onready var label_atividade: Label = $PainelInteracao/VBoxContainer/LabelAtividade
 @onready var label_instrucao: Label = $PainelInteracao/VBoxContainer/LabelInstrucao
 
+@onready var label_dia: Label = $PainelDia/HBoxContainer/LabelDia
+
+@onready var agenda_painel: PanelContainer = $PainelAgenda
+@onready var lista_atividades: VBoxContainer = $PainelAgenda/VBoxContainer/ListaAtividades
+@onready var lista_inventario: VBoxContainer = $PainelAgenda/VBoxContainer/ListaInventario
+
+@onready var painel_dia: PanelContainer = $PainelDia
+@onready var painel_atributos: PanelContainer = $PainelAtributos
+
 var estado: EstadoPartida
 var personagem: Node2D
-var label_dia: Label
-var agenda: RichTextLabel
-var proxima_tarefa: Label
-var agenda_painel: PanelContainer
-var inventario: Label
 var notificacao: PanelContainer
 var toast_titulo: Label
 var toast_texto: Label
@@ -65,9 +70,32 @@ func _process(delta: float) -> void:
 	if personagem == null or agenda_painel == null:
 		return
 	var posicao_tela: Vector2 = personagem.get_global_transform_with_canvas().origin
+	
+	var area_dia := Rect2(painel_dia.position, painel_dia.size).grow(28)
+	var area_atributos := Rect2(painel_atributos.position, painel_atributos.size).grow(28)
 	var area_da_agenda := Rect2(agenda_painel.position, agenda_painel.size).grow(28)
-	var opacidade_alvo := 0.42 if area_da_agenda.has_point(posicao_tela) else 1.0
-	agenda_painel.modulate.a = move_toward(agenda_painel.modulate.a, opacidade_alvo, delta * 3.5)
+	
+	var opacidade_dia := 0.42 if area_dia.has_point(posicao_tela) else 1.0
+	var opacidade_atributos := 0.42 if area_atributos.has_point(posicao_tela) else 1.0
+	var opacidade_agenda := 0.42 if area_da_agenda.has_point(posicao_tela) else 1.0
+	
+	painel_dia.modulate.a = move_toward(
+		painel_dia.modulate.a,
+		opacidade_dia,
+		delta * 3.5
+	)
+
+	painel_atributos.modulate.a = move_toward(
+		painel_atributos.modulate.a,
+		opacidade_atributos,
+		delta * 3.5
+	)
+
+	agenda_painel.modulate.a = move_toward(
+		agenda_painel.modulate.a,
+		opacidade_agenda,
+		delta * 3.5
+	)
 
 func atualizar_atributos(produtividade: int, energia: int, saude_mental: int) -> void:
 	valor_produtividade.text = "%d/10" % produtividade
@@ -220,6 +248,16 @@ func _adicionar_botao_retomar() -> void:
 func mostrar_resultado(vitoria: bool, mensagem: String) -> void:
 	_montar_overlay("SEMANA CONCLUÍDA" if vitoria else "SEMANA DIFÍCIL", mensagem, "JOGAR NOVAMENTE", func(): reiniciar_solicitado.emit(), "", "")
 
+func mostrar_fim_do_dia() -> void:
+	_montar_overlay(
+		"FIM DO DIA",
+		"Já está tarde, vamos encerrar o dia.\n Com pouco tempo de sono, não conseguiremos recuperar muita energia.\n\nEnergia +1",
+		"INICIAR PRÓXIMO DIA",
+		func(): proximo_dia_solicitado.emit(),
+		"",
+		""
+	)
+
 func esconder_telas() -> void:
 	overlay.visible = false
 
@@ -228,58 +266,102 @@ func _atualizar_dia(nome: String, _indice: int) -> void:
 	_atualizar_agenda()
 
 func _atualizar_inventario(itens: Array[String]) -> void:
-	inventario.text = "INVENTÁRIO\n" + (", ".join(itens) if not itens.is_empty() else "Vazio")
+	for filho in lista_inventario.get_children():
+		filho.queue_free()
+
+	if itens.is_empty():
+		var vazio := Label.new()
+		vazio.text = "Vazio"
+		lista_inventario.add_child(vazio)
+		return
+
+	for item in itens:
+		var label := Label.new()
+		label.text = "• " + item
+		lista_inventario.add_child(label)
 
 func _atualizar_agenda() -> void:
 	if estado == null:
 		return
-	var linhas: Array[String] = ["[b]AGENDA DO DIA[/b]"]
-	var proxima := estado.obter_proxima_tarefa(minutos_do_dia)
-	if proxima == null:
-		proxima_tarefa.text = "PRÓXIMA TAREFA\nNenhuma pendência profissional."
-		proxima_tarefa.add_theme_color_override("font_color", Color("B8C7D8"))
-	else:
-		var restantes := proxima.hora_inicio * 60 - minutos_do_dia
-		var cor_urgencia := COR_ACENTO if restantes > 60 else (Color("FF8D5B") if restantes > 30 else Color("F45B69"))
-		proxima_tarefa.text = "PRÓXIMA TAREFA\nATÉ %02d:00  %s\nRestam %d min · %s" % [proxima.hora_inicio, proxima.nome, restantes, proxima.local]
-		proxima_tarefa.add_theme_color_override("font_color", cor_urgencia)
+
+	for filho in lista_atividades.get_children():
+		filho.queue_free()
+
+	var atividades_exibidas: Array = []
+
 	for atividade in estado.obter_atividades():
-		if atividade.local == "Biblioteca" or atividade.local == "Banco":
+		if atividade.local in [
+			"Biblioteca",
+			"Banco",
+			"Casa",
+			"Restaurante Saudável",
+			"Fast Food",
+			"Parque"
+		]:
 			continue
-		if atividade.local == "Casa" or atividade.local == "Restaurante Saudável" or atividade.local == "Fast Food" or atividade.local == "Parque":
-			continue
-		var marca := "✓" if estado.atividades_concluidas.has(atividade.id) else ("✕" if estado.tarefas_perdidas.has(atividade.id) else "•")
-		linhas.append("%s ATÉ %02d:00  %s\n   %s" % [marca, atividade.hora_inicio, atividade.nome, atividade.local])
-	agenda.text = "\n".join(linhas)
+
+		atividades_exibidas.append(atividade)
+
+	if atividades_exibidas.is_empty():
+		var label := Label.new()
+		label.text = "Nenhuma atividade disponível"
+		label.add_theme_color_override(
+			"font_color",
+			Color("B8C7D8")
+		)
+		lista_atividades.add_child(label)
+		return
+
+	var proxima = estado.obter_proxima_tarefa(minutos_do_dia)
+
+	for atividade in atividades_exibidas:
+		var marca := "•"
+
+		if estado.atividades_concluidas.has(atividade.id):
+			marca = "✓"
+		elif estado.tarefas_perdidas.has(atividade.id):
+			marca = "✕"
+
+		var label := Label.new()
+
+		label.text = (
+			"%s ATÉ %02d:00 — %s\n   %s"
+			% [
+				marca,
+				atividade.hora_inicio,
+				atividade.nome,
+				atividade.local
+			]
+		)
+
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+		if (
+			proxima != null
+			and atividade.id == proxima.id
+			and not estado.atividades_concluidas.has(atividade.id)
+			and not estado.tarefas_perdidas.has(atividade.id)
+		):
+			var restantes: int = int(atividade.hora_inicio * 60) - minutos_do_dia
+
+			var cor_urgencia := (
+				COR_ACENTO
+				if restantes > 60
+				else (
+					Color("FF8D5B")
+					if restantes > 30
+					else Color("F45B69")
+				)
+			)
+
+			label.add_theme_color_override(
+				"font_color",
+				cor_urgencia
+			)
+
+		lista_atividades.add_child(label)
 
 func _criar_interface_semana() -> void:
-	label_dia = Label.new()
-	label_dia.position = Vector2(24, 178)
-	label_dia.add_theme_font_size_override("font_size", 18)
-	label_dia.add_theme_color_override("font_color", COR_ACENTO)
-	add_child(label_dia)
-
-	agenda_painel = PanelContainer.new()
-	agenda_painel.position = Vector2(20, 210)
-	agenda_painel.size = Vector2(255, 250)
-	agenda_painel.add_theme_stylebox_override("panel", _cartao())
-	add_child(agenda_painel)
-	var caixa := VBoxContainer.new()
-	caixa.add_theme_constant_override("separation", 12)
-	agenda_painel.add_child(caixa)
-	proxima_tarefa = Label.new()
-	proxima_tarefa.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	proxima_tarefa.add_theme_color_override("font_color", COR_ACENTO)
-	caixa.add_child(proxima_tarefa)
-	agenda = RichTextLabel.new()
-	agenda.bbcode_enabled = true
-	agenda.fit_content = true
-	agenda.custom_minimum_size = Vector2(230, 120)
-	caixa.add_child(agenda)
-	inventario = Label.new()
-	inventario.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	caixa.add_child(inventario)
-
 	notificacao = PanelContainer.new()
 	notificacao.position = Vector2(410, 20)
 	notificacao.size = Vector2(400, 100)

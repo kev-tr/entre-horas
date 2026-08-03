@@ -24,10 +24,10 @@
 [ext_resource type="PackedScene" uid="uid://bjpycw8rekpp0" path="res://cenas/ponto_interacao.tscn" id="21_elfaa"]
 [ext_resource type="Script" uid="uid://dmv7vchbtljwk" path="res://scripts/gerenciador_atividades.gd" id="23_7lu6d"]
 [ext_resource type="Script" uid="uid://cnskn4nv78dud" path="res://scripts/relogio.gd" id="23_em6j3"]
-[ext_resource type="Script" path="res://scripts/estado_partida.gd" id="25_estado"]
-[ext_resource type="Script" path="res://scripts/audio.gd" id="26_audio"]
-[ext_resource type="AudioStream" path="res://sound/ambient.mp3" id="27_ambient"]
-[ext_resource type="Script" path="res://scripts/salvamento.gd" id="28_save"]
+[ext_resource type="Script" uid="uid://ww7aownnvbyn" path="res://scripts/estado_partida.gd" id="25_estado"]
+[ext_resource type="Script" uid="uid://c8srbohw0u0i3" path="res://scripts/audio.gd" id="26_audio"]
+[ext_resource type="AudioStream" uid="uid://bqtscvchba63l" path="res://sound/ambient.mp3" id="27_ambient"]
+[ext_resource type="Script" uid="uid://1bc3ijsc813g" path="res://scripts/salvamento.gd" id="28_save"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iwfo7"]
 texture = ExtResource("1_bhvw8")
@@ -15294,27 +15294,27 @@ tipo_local = "Parque"
 position = Vector2(145, 851)
 tipo_local = "Casa"
 
-[node name="InteracaoBiblioteca" parent="." instance=ExtResource("21_elfaa")]
+[node name="InteracaoBiblioteca" parent="." unique_id=2071619905 instance=ExtResource("21_elfaa")]
 position = Vector2(982, 844)
 tipo_local = "Biblioteca"
 
-[node name="InteracaoBanco" parent="." instance=ExtResource("21_elfaa")]
+[node name="InteracaoBanco" parent="." unique_id=2124450616 instance=ExtResource("21_elfaa")]
 position = Vector2(144, 514)
 tipo_local = "Banco"
 
 [node name="Relogio" type="Node" parent="." unique_id=502804477]
 script = ExtResource("23_em6j3")
 
-[node name="EstadoPartida" type="Node" parent="."]
+[node name="EstadoPartida" type="Node" parent="." unique_id=1182368826]
 script = ExtResource("25_estado")
 
-[node name="LuzDoDia" type="CanvasModulate" parent="."]
+[node name="LuzDoDia" type="CanvasModulate" parent="." unique_id=1705574238]
 
-[node name="Audio" type="Node" parent="."]
+[node name="Audio" type="Node" parent="." unique_id=1197960147]
 script = ExtResource("26_audio")
 musica_ambiente = ExtResource("27_ambient")
 
-[node name="Salvamento" type="Node" parent="."]
+[node name="Salvamento" type="Node" parent="." unique_id=1651849382]
 script = ExtResource("28_save")
 
 [node name="GerenciadorAtividades" type="Node" parent="." unique_id=1992620330]

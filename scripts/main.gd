@@ -4,9 +4,12 @@ extends Node2D
 @onready var relogio = $Relogio
 @onready var estado: EstadoPartida = $EstadoPartida
 @onready var gerenciador = $GerenciadorAtividades
+@onready var player: CharacterBody2D = $Player
 @onready var audio = $Audio
 @onready var luz_do_dia: CanvasModulate = $LuzDoDia
 @onready var salvamento: Salvamento = $Salvamento
+
+var posicao_inicial_player: Vector2
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -18,6 +21,7 @@ func _ready() -> void:
 	hud.reiniciar_solicitado.connect(_iniciar_partida)
 	hud.continuar_solicitado.connect(_continuar_partida)
 	hud.retomar_solicitado.connect(_retomar_partida)
+	hud.proximo_dia_solicitado.connect(_iniciar_proximo_dia)
 	relogio.horario_alterado.connect(hud.atualizar_relogio)
 	relogio.horario_alterado.connect(_verificar_prazos)
 	relogio.horario_alterado.connect(_atualizar_luz_do_dia)
@@ -30,6 +34,7 @@ func _ready() -> void:
 	estado.agenda_alterada.connect(_salvar_progresso)
 	estado.dia_alterado.connect(func(_nome: String, _dia: int): _salvar_progresso())
 	hud.mostrar_menu(salvamento.tem_partida())
+	posicao_inicial_player = player.global_position
 
 func _iniciar_partida() -> void:
 	get_tree().paused = false
@@ -69,8 +74,17 @@ func _retomar_partida() -> void:
 func _fim_automatico() -> void:
 	if not estado.iniciado:
 		return
+
 	estado.encerrar_dia_automatico()
+	hud.mostrar_fim_do_dia()
+
+func _iniciar_proximo_dia() -> void:
+	hud.esconder_telas()
+
+	estado.avancar_dia("Você começa um novo dia.")
+
 	if estado.iniciado:
+		player.global_position = posicao_inicial_player
 		relogio.iniciar_dia()
 		gerenciador._atualizar_pontos()
 
