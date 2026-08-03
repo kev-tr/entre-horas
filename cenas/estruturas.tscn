@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://3sii0pc3qyd7" path="res://sprites/buildings/Angar/angar-building.png" id="4_angar"]
 [ext_resource type="Texture2D" uid="uid://bqhof4omrns0y" path="res://sprites/buildings/Library/library-building.png" id="5_lib"]
 [ext_resource type="Texture2D" uid="uid://jjumgqbyelrn" path="res://sprites/buildings/Bank/bank-building.png" id="6_bank"]
+[ext_resource type="Texture2D" path="res://sprites/buildings/Store/store-building.png" id="7_store"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hosp"]
 size = Vector2(149, 227)
@@ -28,80 +29,109 @@ size = Vector2(120, 96)
 [node name="Estruturas" type="Node2D" unique_id=1115368955]
 y_sort_enabled = true
 
-[node name="Hospital" type="StaticBody2D" parent="." unique_id=933670172]
+[node name="Clinica" type="StaticBody2D" parent="." unique_id=933670172]
 y_sort_enabled = true
 position = Vector2(144, 216)
 
-[node name="Sprite" type="Sprite2D" parent="Hospital" unique_id=799271881]
+[node name="Sprite" type="Sprite2D" parent="Clinica" unique_id=799271881]
 y_sort_enabled = true
 texture = ExtResource("1_hosp")
 offset = Vector2(0, -139)
 
-[node name="Collision" type="CollisionShape2D" parent="Hospital" unique_id=696147714]
+[node name="Collision" type="CollisionShape2D" parent="Clinica" unique_id=696147714]
 position = Vector2(-0.5, -156.5)
 shape = SubResource("RectangleShape2D_hosp")
 
-[node name="Company" type="StaticBody2D" parent="." unique_id=216099819]
+[node name="Empresa" type="StaticBody2D" parent="." unique_id=216099819]
 y_sort_enabled = true
-position = Vector2(144, 520)
+position = Vector2(563, 514)
 
-[node name="Sprite" type="Sprite2D" parent="Company" unique_id=1365808780]
+[node name="Sprite" type="Sprite2D" parent="Empresa" unique_id=1365808780]
 y_sort_enabled = true
 texture = ExtResource("2_comp")
 offset = Vector2(0, -100)
 
-[node name="Collision" type="CollisionShape2D" parent="Company" unique_id=653318778]
+[node name="Collision" type="CollisionShape2D" parent="Empresa" unique_id=653318778]
 position = Vector2(0, -105.5)
 shape = SubResource("RectangleShape2D_comp")
 
-[node name="Chale" type="StaticBody2D" parent="." unique_id=1776438348]
+[node name="Casa" type="StaticBody2D" parent="." unique_id=1776438348]
 y_sort_enabled = true
 position = Vector2(144, 848)
 
-[node name="Sprite" type="Sprite2D" parent="Chale" unique_id=396969524]
+[node name="Sprite" type="Sprite2D" parent="Casa" unique_id=396969524]
 y_sort_enabled = true
 texture = ExtResource("3_chale")
 offset = Vector2(0, -56)
 
-[node name="Collision" type="CollisionShape2D" parent="Chale" unique_id=1213953452]
+[node name="Collision" type="CollisionShape2D" parent="Casa" unique_id=1213953452]
 position = Vector2(0, -64.5)
 shape = SubResource("RectangleShape2D_chale")
 
-[node name="Angar" type="StaticBody2D" parent="." unique_id=939491700]
+[node name="Restaurante" type="StaticBody2D" parent="." unique_id=939491700]
 y_sort_enabled = true
-position = Vector2(560, 216)
+position = Vector2(562, 211)
 
-[node name="Sprite" type="Sprite2D" parent="Angar" unique_id=720092901]
+[node name="Sprite" type="Sprite2D" parent="Restaurante" unique_id=720092901]
 y_sort_enabled = true
-texture = ExtResource("4_angar")
-offset = Vector2(0, -64)
+texture = ExtResource("7_store")
+offset = Vector2(0, -51)
 
-[node name="Collision" type="CollisionShape2D" parent="Angar" unique_id=89381672]
-position = Vector2(0, -69)
-shape = SubResource("RectangleShape2D_angar")
+[node name="Collision" type="CollisionShape2D" parent="Restaurante" unique_id=89381672]
+position = Vector2(0, -51)
+shape = SubResource("RectangleShape2D_bank")
 
-[node name="Library" type="StaticBody2D" parent="." unique_id=1556976463]
+[node name="Biblioteca" type="StaticBody2D" parent="."]
 y_sort_enabled = true
-position = Vector2(560, 520)
+position = Vector2(982, 844)
 
-[node name="Sprite" type="Sprite2D" parent="Library" unique_id=1565274067]
+[node name="Sprite" type="Sprite2D" parent="Biblioteca"]
 y_sort_enabled = true
 texture = ExtResource("5_lib")
-offset = Vector2(0, -140)
+scale = Vector2(0.55, 0.55)
+offset = Vector2(0, -105)
 
-[node name="Collision" type="CollisionShape2D" parent="Library" unique_id=1844289357]
-position = Vector2(3.5, -144)
-shape = SubResource("RectangleShape2D_lib")
+[node name="Collision" type="CollisionShape2D" parent="Biblioteca"]
+position = Vector2(0, -56)
+shape = SubResource("RectangleShape2D_bank")
 
-[node name="Bank" type="StaticBody2D" parent="." unique_id=400611524]
+[node name="Banco" type="StaticBody2D" parent="."]
 y_sort_enabled = true
-position = Vector2(560, 848)
+position = Vector2(144, 514)
 
-[node name="Sprite" type="Sprite2D" parent="Bank" unique_id=1567817828]
+[node name="Sprite" type="Sprite2D" parent="Banco"]
 y_sort_enabled = true
 texture = ExtResource("6_bank")
-offset = Vector2(0, -64)
+offset = Vector2(0, -51)
 
-[node name="Collision" type="CollisionShape2D" parent="Bank" unique_id=246478321]
-position = Vector2(0, -68)
+[node name="Collision" type="CollisionShape2D" parent="Banco"]
+position = Vector2(0, -51)
+shape = SubResource("RectangleShape2D_bank")
+
+[node name="Farmacia" type="StaticBody2D" parent="." unique_id=1556976463]
+y_sort_enabled = true
+position = Vector2(998, 212)
+
+[node name="Sprite" type="Sprite2D" parent="Farmacia" unique_id=1565274067]
+y_sort_enabled = true
+texture = ExtResource("7_store")
+modulate = Color(0.62, 0.82, 1, 1)
+offset = Vector2(0, -51)
+
+[node name="Collision" type="CollisionShape2D" parent="Farmacia" unique_id=1844289357]
+position = Vector2(0, -51)
+shape = SubResource("RectangleShape2D_bank")
+
+[node name="FastFood" type="StaticBody2D" parent="." unique_id=400611524]
+y_sort_enabled = true
+position = Vector2(534, 853)
+
+[node name="Sprite" type="Sprite2D" parent="FastFood" unique_id=1567817828]
+y_sort_enabled = true
+texture = ExtResource("7_store")
+modulate = Color(1, 0.72, 0.55, 1)
+offset = Vector2(0, -51)
+
+[node name="Collision" type="CollisionShape2D" parent="FastFood" unique_id=246478321]
+position = Vector2(0, -51)
 shape = SubResource("RectangleShape2D_bank")
