@@ -22,19 +22,12 @@
 [ext_resource type="PackedScene" uid="uid://c8h38tb736ccc" path="res://cenas/estruturas.tscn" id="19_estrut"]
 [ext_resource type="PackedScene" uid="uid://bu1rcle2j0gyu" path="res://cenas/hud.tscn" id="20_elfaa"]
 [ext_resource type="PackedScene" uid="uid://bjpycw8rekpp0" path="res://cenas/ponto_interacao.tscn" id="21_elfaa"]
-[ext_resource type="Resource" uid="uid://cckiya773ongk" path="res://recursos/relatorio.tres" id="22_03f8d"]
 [ext_resource type="Script" uid="uid://dmv7vchbtljwk" path="res://scripts/gerenciador_atividades.gd" id="23_7lu6d"]
 [ext_resource type="Script" uid="uid://cnskn4nv78dud" path="res://scripts/relogio.gd" id="23_em6j3"]
-[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="24_ostd4"]
-[ext_resource type="Resource" uid="uid://c40blkntgl7hb" path="res://recursos/consulta.tres" id="25_71ex4"]
-[ext_resource type="Resource" uid="uid://db61of2hyydk4" path="res://recursos/dormir.tres" id="25_ql61m"]
-[ext_resource type="Resource" uid="uid://dc1htpwdsy0sn" path="res://recursos/almoco.tres" id="27_rq53p"]
-[ext_resource type="Resource" uid="uid://bjy4abg6tck0v" path="res://recursos/jantar.tres" id="28_f45cg"]
-[ext_resource type="Resource" uid="uid://gr8aelgh5uxr" path="res://recursos/lanche.tres" id="29_46tt2"]
-[ext_resource type="Resource" uid="uid://bcccvchm7b1n2" path="res://recursos/remedio.tres" id="30_xy25r"]
-[ext_resource type="Resource" uid="uid://dc4wi33d1p0o5" path="res://recursos/caminhar.tres" id="31_2nh74"]
-[ext_resource type="Resource" uid="uid://dxew5qjbxcia6" path="res://recursos/correr.tres" id="32_ql61m"]
-[ext_resource type="Resource" uid="uid://d3hs3gv3n5yyn" path="res://recursos/encontrar_amigos.tres" id="33_28mpu"]
+[ext_resource type="Script" path="res://scripts/estado_partida.gd" id="25_estado"]
+[ext_resource type="Script" path="res://scripts/audio.gd" id="26_audio"]
+[ext_resource type="AudioStream" path="res://sound/ambient.mp3" id="27_ambient"]
+[ext_resource type="Script" path="res://scripts/salvamento.gd" id="28_save"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iwfo7"]
 texture = ExtResource("1_bhvw8")
@@ -15265,7 +15258,6 @@ position = Vector2(1161, 452)
 shape = SubResource("RectangleShape2D_7600c")
 
 [node name="Estruturas" parent="." unique_id=22183361 instance=ExtResource("19_estrut")]
-visible = false
 
 [node name="Player" parent="." unique_id=76362413 instance=ExtResource("18_22nsn")]
 position = Vector2(192, 872)
@@ -15305,12 +15297,17 @@ tipo_local = "Casa"
 [node name="Relogio" type="Node" parent="." unique_id=502804477]
 script = ExtResource("23_em6j3")
 
+[node name="EstadoPartida" type="Node" parent="."]
+script = ExtResource("25_estado")
+
+[node name="LuzDoDia" type="CanvasModulate" parent="."]
+
+[node name="Audio" type="Node" parent="."]
+script = ExtResource("26_audio")
+musica_ambiente = ExtResource("27_ambient")
+
+[node name="Salvamento" type="Node" parent="."]
+script = ExtResource("28_save")
+
 [node name="GerenciadorAtividades" type="Node" parent="." unique_id=1992620330]
 script = ExtResource("23_7lu6d")
-atividades_casa = Array[ExtResource("24_ostd4")]([ExtResource("25_ql61m")])
-atividades_empresa = Array[ExtResource("24_ostd4")]([ExtResource("22_03f8d")])
-atividades_clinica = Array[ExtResource("24_ostd4")]([ExtResource("25_71ex4")])
-atividades_restaurante = Array[ExtResource("24_ostd4")]([ExtResource("27_rq53p"), ExtResource("28_f45cg")])
-atividades_fast_food = Array[ExtResource("24_ostd4")]([ExtResource("29_46tt2")])
-atividades_farmacia = Array[ExtResource("24_ostd4")]([ExtResource("30_xy25r")])
-atividades_parque = Array[ExtResource("24_ostd4")]([ExtResource("31_2nh74"), ExtResource("32_ql61m"), ExtResource("33_28mpu")])
