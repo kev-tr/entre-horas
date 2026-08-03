@@ -11,6 +11,8 @@ func _ready() -> void:
 		"Restaurante Saudável": $"../InteracaoRestaurante", "Fast Food": $"../InteracaoFastFood",
 		"Farmácia": $"../InteracaoFarmacia", "Parque": $"../InteracaoParque"
 	}
+	locais["Biblioteca"] = $"../InteracaoBiblioteca"
+	locais["Banco"] = $"../InteracaoBanco"
 	estado.dia_alterado.connect(_atualizar_pontos)
 	estado.atributos_alterados.connect(func(_p: int, _e: int, _s: int): _atualizar_pontos())
 	relogio.horario_alterado.connect(func(_horario: String): _atualizar_pontos())

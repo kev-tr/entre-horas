@@ -81,6 +81,33 @@ offset = Vector2(0, -51)
 position = Vector2(0, -51)
 shape = SubResource("RectangleShape2D_bank")
 
+[node name="Biblioteca" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(982, 844)
+
+[node name="Sprite" type="Sprite2D" parent="Biblioteca"]
+y_sort_enabled = true
+texture = ExtResource("5_lib")
+scale = Vector2(0.55, 0.55)
+offset = Vector2(0, -105)
+
+[node name="Collision" type="CollisionShape2D" parent="Biblioteca"]
+position = Vector2(0, -56)
+shape = SubResource("RectangleShape2D_bank")
+
+[node name="Banco" type="StaticBody2D" parent="."]
+y_sort_enabled = true
+position = Vector2(144, 514)
+
+[node name="Sprite" type="Sprite2D" parent="Banco"]
+y_sort_enabled = true
+texture = ExtResource("6_bank")
+offset = Vector2(0, -51)
+
+[node name="Collision" type="CollisionShape2D" parent="Banco"]
+position = Vector2(0, -51)
+shape = SubResource("RectangleShape2D_bank")
+
 [node name="Farmacia" type="StaticBody2D" parent="." unique_id=1556976463]
 y_sort_enabled = true
 position = Vector2(998, 212)

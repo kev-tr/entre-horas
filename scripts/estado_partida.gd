@@ -170,6 +170,8 @@ func obter_atividades() -> Array[Atividade]:
 		Atividade.criar("amigos_%d" % dia, "Encontrar amigos", "Parque", "Conexão também faz parte da rotina.", 60, 0, -1, 2, 17, 22),
 		Atividade.criar("dormir_%d" % dia, "Dormir", "Casa", "Encerre o dia e recupere parte das forças.", 1, 0, 0, 0, 20, 24)
 	]
+	atividades.append(Atividade.criar("estudar_%d" % dia, "Estudar em silencio", "Biblioteca", "Um tempo tranquilo para organizar os pensamentos.", 35, 0, -1, 2, 9, 17))
+	atividades.append(Atividade.criar("financas_%d" % dia, "Organizar financas", "Banco", "Planejar as contas reduz a pressao da semana.", 25, 0, 1, 1, 9, 16))
 	match dia:
 		0: atividades.append(Atividade.criar("relatorio", "Relatório", "Empresa", "Um avanço importante no projeto da semana.", 60, 2, -3, -2, 9, 17, "", false, "", false, true))
 		1:
@@ -193,6 +195,8 @@ func obter_atividades() -> Array[Atividade]:
 func obter_proxima_tarefa(minutos_do_dia := 0.0) -> Atividade:
 	var proxima: Atividade = null
 	for atividade in obter_atividades():
+		if atividade.local == "Biblioteca" or atividade.local == "Banco":
+			continue
 		if atividade.local in ["Casa", "Restaurante Saudável", "Fast Food", "Parque"] or atividade_bloqueada(atividade):
 			continue
 		if atividade.usa_hora_inicio_como_prazo and minutos_do_dia >= atividade.hora_inicio * 60:

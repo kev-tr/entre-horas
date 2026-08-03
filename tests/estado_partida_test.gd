@@ -6,6 +6,7 @@ func _init() -> void:
 	_testar_relogio()
 	_testar_limites_e_avanco_de_tempo()
 	_testar_receita_e_remedio()
+	_testar_atividades_de_equilibrio()
 	_testar_prazo_perdido_e_esgotamento()
 	_testar_escolha_exclusiva()
 	_testar_rota_vencedora_balanceada()
@@ -22,7 +23,7 @@ func _testar_sprites_das_estruturas_visiveis() -> void:
 	var cena: Node2D = load("res://cenas/main.tscn").instantiate()
 	var estruturas: Node2D = cena.get_node("Estruturas")
 	assert(estruturas.visible)
-	for nome in ["Clinica", "Empresa", "Casa", "Restaurante", "Farmacia", "FastFood"]:
+	for nome in ["Clinica", "Empresa", "Casa", "Restaurante", "Farmacia", "FastFood", "Biblioteca", "Banco"]:
 		var sprite: Sprite2D = estruturas.get_node("%s/Sprite" % nome)
 		assert(sprite.visible)
 		assert(sprite.texture != null)
@@ -86,6 +87,18 @@ func _testar_receita_e_remedio() -> void:
 	assert(estado.itens.has("Receita"))
 	assert(estado.aplicar_atividade(remedio))
 	assert(not estado.itens.has("Receita"))
+
+func _testar_atividades_de_equilibrio() -> void:
+	var estado := _novo_estado()
+	var estudo := _atividade(estado, "estudar_0")
+	var financas := _atividade(estado, "financas_0")
+	assert(estudo.local == "Biblioteca")
+	assert(financas.local == "Banco")
+	assert(estudo.esta_disponivel(9 * 60))
+	assert(financas.esta_disponivel(15 * 60))
+	assert(not financas.esta_disponivel(16 * 60))
+	assert(estado.aplicar_atividade(estudo))
+	assert(estado.saude_mental == 8)
 
 func _atividade(estado: EstadoPartida, id: String) -> Atividade:
 	for atividade in estado.obter_atividades():

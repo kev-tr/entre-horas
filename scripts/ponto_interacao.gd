@@ -9,7 +9,9 @@ extends Area2D
 	"Fast Food",
 	"Farmácia",
 	"Clínica",
-	"Parque"
+	"Parque",
+	"Biblioteca",
+	"Banco"
 ) var tipo_local: String
 
 @export var atividade_atual: Atividade

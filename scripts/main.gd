@@ -102,6 +102,8 @@ func _adicionar_rotulos_de_locais() -> void:
 		"InteracaoRestaurante": "RESTAURANTE", "InteracaoFastFood": "FAST FOOD",
 		"InteracaoFarmacia": "FARMÁCIA", "InteracaoParque": "PARQUE"
 	}
+	destinos["InteracaoBiblioteca"] = "BIBLIOTECA"
+	destinos["InteracaoBanco"] = "BANCO"
 	for no in destinos:
 		var ponto: Area2D = get_node(NodePath(no))
 		var rotulo := Label.new()

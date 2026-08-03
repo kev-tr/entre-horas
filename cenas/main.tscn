@@ -15294,6 +15294,14 @@ tipo_local = "Parque"
 position = Vector2(145, 851)
 tipo_local = "Casa"
 
+[node name="InteracaoBiblioteca" parent="." instance=ExtResource("21_elfaa")]
+position = Vector2(982, 844)
+tipo_local = "Biblioteca"
+
+[node name="InteracaoBanco" parent="." instance=ExtResource("21_elfaa")]
+position = Vector2(144, 514)
+tipo_local = "Banco"
+
 [node name="Relogio" type="Node" parent="." unique_id=502804477]
 script = ExtResource("23_em6j3")
 

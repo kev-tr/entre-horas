@@ -41,6 +41,7 @@ var overlay: ColorRect
 var overlay_caixa: VBoxContainer
 var minutos_do_dia := 8 * 60
 var pausado := false
+var menu_pode_retomar := false
 
 func _ready() -> void:
 	_montar_segmentos(segmentos_produtividade)
@@ -99,9 +100,115 @@ func mostrar_mensagem(titulo: String, descricao: String) -> void:
 	timer.timeout.connect(func(): notificacao.visible = false)
 
 func mostrar_menu(pode_retomar := false) -> void:
+	menu_pode_retomar = pode_retomar
+	_montar_menu_arcade(pode_retomar)
+	return
 	if pode_retomar:
 		call_deferred("_adicionar_botao_retomar")
 	_montar_overlay("ENTRE HORAS", "Equilibre carreira, Energia e Saúde Mental durante uma semana.\n\nExplore o mapa, aproxime-se de uma Estrutura e pressione ESPAÇO para escolher uma atividade. Dormir na Casa após 20:00 encerra o dia.", "INICIAR SEMANA", func(): iniciar_solicitado.emit(), "INSTRUÇÕES", "Tarefas da agenda mostram o prazo final. TAB alterna escolhas. ESC pausa. Meta: Produtividade 8/10 e Energia e Saúde Mental acima de zero na sexta-feira.")
+
+func _montar_menu_arcade(pode_retomar: bool) -> void:
+	_limpar_overlay()
+	overlay.color = Color("080B18")
+	var moldura := PanelContainer.new()
+	moldura.custom_minimum_size = Vector2(590, 0)
+	moldura.add_theme_stylebox_override("panel", _painel_arcade(Color("F6C453")))
+	overlay_caixa.add_child(moldura)
+	var caixa := VBoxContainer.new()
+	caixa.add_theme_constant_override("separation", 14)
+	moldura.add_child(caixa)
+	var brilho := Label.new()
+	brilho.text = "◆  ◆  ◆  ◆  ◆"
+	brilho.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	brilho.add_theme_font_size_override("font_size", 15)
+	brilho.add_theme_color_override("font_color", Color("59D4FF"))
+	caixa.add_child(brilho)
+	var titulo := Label.new()
+	titulo.text = "ENTRE\nHORAS"
+	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titulo.add_theme_font_size_override("font_size", 48)
+	titulo.add_theme_color_override("font_color", Color("F6C453"))
+	titulo.add_theme_color_override("font_outline_color", Color("271C3C"))
+	titulo.add_theme_constant_override("outline_size", 8)
+	caixa.add_child(titulo)
+	var chamada := Label.new()
+	chamada.text = "UMA SEMANA. PRAZOS. ESCOLHAS."
+	chamada.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	chamada.add_theme_font_size_override("font_size", 17)
+	chamada.add_theme_color_override("font_color", Color("D5E7FF"))
+	caixa.add_child(chamada)
+	_adicionar_botao_arcade(caixa, "INICIAR SEMANA", Color("3DCC5A"), func(): iniciar_solicitado.emit())
+	if pode_retomar:
+		_adicionar_botao_arcade(caixa, "CONTINUAR SEMANA", Color("3A8FE8"), func(): retomar_solicitado.emit())
+	_adicionar_botao_arcade(caixa, "COMO JOGAR", Color("F6C453"), _mostrar_regras)
+	var rodape := Label.new()
+	rodape.text = "[ESPAÇO] interagir    [TAB] trocar opcao    [ESC] pausar"
+	rodape.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rodape.add_theme_font_size_override("font_size", 14)
+	rodape.add_theme_color_override("font_color", Color("95A8C7"))
+	caixa.add_child(rodape)
+	overlay.visible = true
+
+func _mostrar_regras() -> void:
+	_limpar_overlay()
+	var painel := PanelContainer.new()
+	painel.custom_minimum_size = Vector2(640, 0)
+	painel.add_theme_stylebox_override("panel", _painel_arcade(Color("59D4FF")))
+	overlay_caixa.add_child(painel)
+	var caixa := VBoxContainer.new()
+	caixa.add_theme_constant_override("separation", 14)
+	painel.add_child(caixa)
+	var titulo := Label.new()
+	titulo.text = "COMO JOGAR"
+	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titulo.add_theme_font_size_override("font_size", 32)
+	titulo.add_theme_color_override("font_color", Color("59D4FF"))
+	caixa.add_child(titulo)
+	var regras := Label.new()
+	regras.text = "1. Explore o mapa e use ESPACO perto de um local.\n\n2. Atividades profissionais devem ser concluidas antes do horario da agenda. Perder um prazo reduz Produtividade e Saude Mental.\n\n3. Equilibre trabalho com comida, parque, biblioteca, banco e sono.\n\n4. Durma na Casa a partir das 20:00 para avancar o dia. Quanto mais tarde, menor a recuperacao.\n\n5. Na sexta, venca com Produtividade 8+, Energia 1+ e Saude Mental 1+."
+	regras.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	regras.add_theme_font_size_override("font_size", 17)
+	regras.add_theme_color_override("font_color", Color("E3EEFF"))
+	caixa.add_child(regras)
+	_adicionar_botao_arcade(caixa, "VOLTAR AO MENU", Color("F6C453"), func(): _montar_menu_arcade(menu_pode_retomar))
+	overlay.visible = true
+
+func _limpar_overlay() -> void:
+	for filho in overlay_caixa.get_children():
+		filho.queue_free()
+
+func _adicionar_botao_arcade(caixa: VBoxContainer, texto: String, cor: Color, acao: Callable) -> void:
+	var botao := Button.new()
+	botao.text = texto
+	botao.custom_minimum_size = Vector2(0, 48)
+	botao.add_theme_font_size_override("font_size", 19)
+	botao.add_theme_color_override("font_color", Color("10151D"))
+	botao.add_theme_stylebox_override("normal", _botao_arcade(cor))
+	botao.add_theme_stylebox_override("hover", _botao_arcade(cor.lightened(0.16)))
+	botao.add_theme_stylebox_override("pressed", _botao_arcade(cor.darkened(0.18)))
+	botao.pressed.connect(acao)
+	caixa.add_child(botao)
+
+func _painel_arcade(cor: Color) -> StyleBoxFlat:
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color("151B31")
+	estilo.border_color = cor
+	estilo.set_border_width_all(4)
+	estilo.content_margin_left = 28
+	estilo.content_margin_right = 28
+	estilo.content_margin_top = 22
+	estilo.content_margin_bottom = 22
+	return estilo
+
+func _botao_arcade(cor: Color) -> StyleBoxFlat:
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = cor
+	estilo.border_color = Color("0A0D18")
+	estilo.set_border_width_all(3)
+	estilo.shadow_color = Color("00000088")
+	estilo.shadow_size = 5
+	estilo.shadow_offset = Vector2(0, 4)
+	return estilo
 
 func _adicionar_botao_retomar() -> void:
 	var retomar := Button.new()
@@ -137,6 +244,8 @@ func _atualizar_agenda() -> void:
 		proxima_tarefa.text = "PRÓXIMA TAREFA\nATÉ %02d:00  %s\nRestam %d min · %s" % [proxima.hora_inicio, proxima.nome, restantes, proxima.local]
 		proxima_tarefa.add_theme_color_override("font_color", cor_urgencia)
 	for atividade in estado.obter_atividades():
+		if atividade.local == "Biblioteca" or atividade.local == "Banco":
+			continue
 		if atividade.local == "Casa" or atividade.local == "Restaurante Saudável" or atividade.local == "Fast Food" or atividade.local == "Parque":
 			continue
 		var marca := "✓" if estado.atividades_concluidas.has(atividade.id) else ("✕" if estado.tarefas_perdidas.has(atividade.id) else "•")
