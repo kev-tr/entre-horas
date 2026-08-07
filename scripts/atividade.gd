@@ -52,6 +52,7 @@ enum TipoCompromisso {
 @export var item_concedido: String = ""
 @export var especial: bool = false
 @export var grupo_escolha: String = ""
+@export var atividade_precedente: String = ""
 
 func esta_disponivel(minutos_do_dia: float) -> bool:
 	var inicio := hora_inicio * 60
@@ -92,29 +93,37 @@ func pode_ser_concluida(minutos_do_dia: float) -> bool:
 static func criar(
 	atividade_id: String, titulo: String, destino: String, texto: String,
 	duracao: int, p: int, e: int, s: int, inicio: int, fim: int,
-	necessario := "", consome := false, concedido := "", is_especial := false,
-	usa_prazo := false, grupo := "",
+	necessario := "", consome := false, concedido := "",
+	is_especial := false, usa_prazo := false, grupo := "",
+	precedente := "",
 	tipo_atividade := TipoAtividade.LIVRE,
 	mostrar_na_agenda := false
 ) -> Atividade:
-	
 	var atividade := Atividade.new()
+
 	atividade.id = atividade_id
 	atividade.nome = titulo
 	atividade.local = destino
 	atividade.descricao = texto
+
 	atividade.duracao_minutos = duracao
 	atividade.produtividade = p
 	atividade.energia = e
 	atividade.saude_mental = s
+
 	atividade.hora_inicio = inicio
 	atividade.hora_fim = fim
 	atividade.usa_hora_inicio_como_prazo = usa_prazo
+
 	atividade.item_necessario = necessario
 	atividade.consome_item = consome
 	atividade.item_concedido = concedido
+
 	atividade.especial = is_especial
 	atividade.grupo_escolha = grupo
+	atividade.atividade_precedente = precedente
+
 	atividade.tipo = tipo_atividade
 	atividade.exibir_na_agenda = mostrar_na_agenda
+
 	return atividade

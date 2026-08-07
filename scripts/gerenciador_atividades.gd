@@ -62,6 +62,6 @@ func _atividades_para_local(local: String) -> Array[Atividade]:
 	if not estado.iniciado:
 		return disponiveis
 	for atividade in estado.obter_atividades():
-		if atividade.local == local and not estado.atividade_bloqueada(atividade) and atividade.pode_ser_concluida(relogio.minutos_atuais):
+		if atividade.local == local and estado.atividade_revelada(atividade) and not estado.atividade_bloqueada(atividade) and atividade.pode_ser_concluida(relogio.minutos_atuais):
 			disponiveis.append(atividade)
 	return disponiveis

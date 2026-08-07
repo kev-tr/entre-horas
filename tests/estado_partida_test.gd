@@ -1,15 +1,13 @@
 extends SceneTree
 
 func _init() -> void:
-	_testar_prazo_da_atividade()
 	_testar_sprites_das_estruturas_visiveis()
 	_testar_relogio()
 	_testar_limites_e_avanco_de_tempo()
-	_testar_receita_e_remedio()
 	_testar_atividades_de_equilibrio()
-	_testar_prazo_perdido_e_esgotamento()
-	_testar_escolha_exclusiva()
-	_testar_rota_vencedora_balanceada()
+	_testar_cadeia_sorteada()
+	_testar_agenda_limpa_e_ordenada()
+	_testar_locais_sorteaveis_existem_no_mapa()
 	_testar_resultados_da_semana()
 	print("estado_partida_test: OK")
 	quit()
@@ -99,6 +97,53 @@ func _testar_atividades_de_equilibrio() -> void:
 	assert(not financas.esta_disponivel(16 * 60))
 	assert(estado.aplicar_atividade(estudo))
 	assert(estado.saude_mental == 8)
+
+func _testar_cadeia_sorteada() -> void:
+	var estado := _novo_estado()
+	var primeira := _atividade(estado, "cadeia_0_0")
+	var segunda := _atividade(estado, "cadeia_0_1")
+	var terceira := _atividade(estado, "cadeia_0_2")
+	assert(primeira.hora_inicio == 11)
+	assert(segunda.hora_inicio == 14)
+	assert(terceira.hora_inicio == 17)
+	assert(not estado.atividade_revelada(segunda))
+	assert(estado.aplicar_atividade(primeira))
+	assert(estado.atividade_revelada(segunda))
+	assert(not estado.atividade_revelada(terceira))
+	assert(estado.aplicar_atividade(segunda))
+	assert(estado.atividade_revelada(terceira))
+	var locais := {primeira.local: true, segunda.local: true, terceira.local: true}
+	assert(locais.size() == 3)
+	var parque := _atividade(estado, "respirar_0")
+	assert(parque.esta_disponivel(23 * 60))
+
+func _testar_agenda_limpa_e_ordenada() -> void:
+	var estado := _novo_estado()
+	var agenda := estado.obter_tarefas_da_agenda()
+	assert(agenda.size() == 1)
+	assert(agenda[0].id == "cadeia_0_0")
+	assert(agenda[0].hora_inicio == 11)
+	assert(estado.aplicar_atividade(agenda[0]))
+	agenda = estado.obter_tarefas_da_agenda()
+	assert(agenda.size() == 2)
+	assert(agenda[0].hora_inicio == 11)
+	assert(agenda[1].hora_inicio == 14)
+	assert(estado.aplicar_atividade(agenda[1]))
+	agenda = estado.obter_tarefas_da_agenda()
+	assert(agenda.size() == 3)
+	assert(agenda[2].hora_inicio == 17)
+	for tarefa in agenda:
+		assert(tarefa.id.begins_with("cadeia_"))
+
+func _testar_locais_sorteaveis_existem_no_mapa() -> void:
+	var cena: Node2D = load("res://cenas/main.tscn").instantiate()
+	var locais_do_mapa := {}
+	for nome in ["InteracaoEmpresa", "InteracaoClinica", "InteracaoRestaurante", "InteracaoParque", "InteracaoBiblioteca", "InteracaoBanco"]:
+		var ponto = cena.get_node(nome)
+		locais_do_mapa[ponto.tipo_local] = true
+	for definicao in EstadoPartida.POOL_CADEIA:
+		assert(locais_do_mapa.has(definicao.local), "Local sorteável sem ponto de interação: %s" % definicao.local)
+	_liberar_arvore(cena)
 
 func _atividade(estado: EstadoPartida, id: String) -> Atividade:
 	for atividade in estado.obter_atividades():

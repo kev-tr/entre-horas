@@ -316,6 +316,9 @@ func _atualizar_agenda() -> void:
 		if not atividade.exibir_na_agenda:
 			continue
 
+		if not estado.atividade_revelada(atividade):
+			continue
+
 		atividades_exibidas.append(atividade)
 
 	if atividades_exibidas.is_empty():

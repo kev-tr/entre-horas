@@ -77,6 +77,8 @@ func aplicar_atividade(
 ) -> bool:
 	if not iniciado or atividades_concluidas.has(atividade.id):
 		return false
+	if not atividade_revelada(atividade):
+		return false
 	if atividade.item_necessario != "" and not itens.has(atividade.item_necessario):
 		notificacao_recebida.emit("Item necessário", "Você precisa de %s." % atividade.item_necessario)
 		return false
@@ -113,7 +115,7 @@ func aplicar_atividade(
 
 	if atividade.item_concedido != "":
 		texto += "\nItem recebido: %s." % atividade.item_concedido
-
+	
 	if concluida_com_atraso:
 		titulo = "Entrega atrasada"
 		texto = (
@@ -123,7 +125,9 @@ func aplicar_atividade(
 		texto += "Produtividade reduzida em 1 e Saúde Mental reduzida em 1 adicional."
 
 	notificacao_recebida.emit(titulo, texto)
-
+	
+	_notificar_tarefas_reveladas(atividade.id)
+	
 	return true
 
 func alterar_atributos(p: int, e: int, s: int) -> void:
@@ -141,6 +145,9 @@ func verificar_prazos(minutos_do_dia: float) -> void:
 		if not atividade.tem_prazo:
 			continue
 
+		if not atividade_revelada(atividade):
+			continue
+
 		if atividades_concluidas.has(atividade.id) or tarefas_perdidas.has(atividade.id):
 			continue
 
@@ -154,18 +161,26 @@ func verificar_prazos(minutos_do_dia: float) -> void:
 			agenda_alterada.emit()
 			prazo_perdido.emit(atividade)
 
-		if atividade.tipo_compromisso == Atividade.TipoCompromisso.HORARIO_MARCADO:
-			notificacao_recebida.emit(
-				"Compromisso perdido",
-				"Você não compareceu a %s até %02d:00. Produtividade e Saúde Mental diminuíram."
-				% [atividade.nome,atividade.hora_prazo]
-			)
-		else:
-			notificacao_recebida.emit(
-				"Prazo perdido",
-				"%s não foi concluída até %02d:00. Produtividade e Saúde Mental diminuíram."
-				% [atividade.nome,atividade.hora_prazo]
-			)
+			_notificar_tarefas_reveladas(atividade.id)
+
+			if atividade.tipo_compromisso == Atividade.TipoCompromisso.HORARIO_MARCADO:
+				notificacao_recebida.emit(
+					"Compromisso perdido",
+					"Você não compareceu a %s até %02d:00. Produtividade e Saúde Mental diminuíram."
+					% [
+						atividade.nome,
+						atividade.hora_prazo
+					]
+				)
+			else:
+				notificacao_recebida.emit(
+					"Prazo perdido",
+					"%s não foi concluída até %02d:00. Produtividade e Saúde Mental diminuíram."
+					% [
+						atividade.nome,
+						atividade.hora_prazo
+					]
+				)
 			
 func _avaliar_esgotamento() -> void:
 	var novo_estado := energia <= 2 or saude_mental <= 2
@@ -244,13 +259,43 @@ func obter_atividades() -> Array[Atividade]:
 		atividades.append(Atividade.criar("alinhamento", "Alinhamento", "Empresa", "Uma conversa curta evita retrabalho no fim da semana.", 20, 1, -2, -1, 10, 17, "", false, "", false, true))
 	elif dia == 4:
 		atividades.append(Atividade.criar("apresentacao", "Apresentar entrega", "Empresa", "Defenda o resultado para encerrar a semana.", 25, 1, -2, -1, 11, 17, "", false, "", true, true))
+
 	return atividades
+
+func atividade_revelada(atividade: Atividade) -> bool:
+	return atividade.atividade_precedente == "" or atividades_concluidas.has(atividade.atividade_precedente) or tarefas_perdidas.has(atividade.atividade_precedente)
+
+func _notificar_tarefas_reveladas(id_anterior: String) -> void:
+	for atividade in obter_atividades():
+		if atividade.atividade_precedente != id_anterior:
+			continue
+
+		if atividade_bloqueada(atividade):
+			continue
+
+		var texto := "%s foi liberada." % atividade.nome
+
+		if atividade.tem_prazo:
+			if atividade.tipo_compromisso == Atividade.TipoCompromisso.HORARIO_MARCADO:
+				texto += "\nHorário marcado: %02d:00." % atividade.hora_prazo
+			else:
+				texto += "\nEntrega até: %02d:00." % atividade.hora_prazo
+
+		notificacao_recebida.emit(
+			"Nova atividade",
+			texto
+		)
+
+		agenda_alterada.emit()
 
 func obter_proxima_tarefa(minutos_do_dia := 0.0) -> Atividade:
 	var proxima: Atividade = null
 
 	for atividade in obter_atividades():
 		if not atividade.tem_prazo:
+			continue
+
+		if not atividade_revelada(atividade):
 			continue
 
 		if atividade_bloqueada(atividade):
@@ -279,13 +324,34 @@ func notificar_dia() -> void:
 		)
 		return
 
-	notificacao_recebida.emit(
-		"Agenda de %s" % nome_dia(),
-		"%s — %s\nEntrega até: %02d:00\nTempo para executar: %d min"
-		% [
+	var detalhe := ""
+
+	if proxima.tipo_compromisso == Atividade.TipoCompromisso.HORARIO_MARCADO:
+		detalhe = (
+			"%s — %s\n"
+			+ "Horário marcado: %02d:00\n"
+			+ "Disponível a partir de: %02d:00\n"
+			+ "Tempo para executar: %d min"
+		) % [
+			proxima.nome,
+			proxima.local,
+			proxima.hora_prazo,
+			proxima.hora_inicio,
+			proxima.duracao_minutos
+		]
+	else:
+		detalhe = (
+			"%s — %s\n"
+			+ "Entrega até: %02d:00\n"
+			+ "Tempo para executar: %d min"
+		) % [
 			proxima.nome,
 			proxima.local,
 			proxima.hora_prazo,
 			proxima.duracao_minutos
 		]
+
+	notificacao_recebida.emit(
+		"Agenda de %s" % nome_dia(),
+		detalhe
 	)
