@@ -4,6 +4,7 @@ extends Node
 signal atributos_alterados(produtividade: int, energia: int, saude_mental: int)
 signal dia_alterado(nome_dia: String, indice: int)
 signal notificacao_recebida(titulo: String, descricao: String)
+signal aviso_importante(titulo: String, descricao: String)
 signal inventario_alterado(itens: Array[String])
 signal agenda_alterada
 signal partida_encerrada(vitoria: bool, mensagem: String)
@@ -26,10 +27,15 @@ var resultado_final := false
 var em_esgotamento := false
 var ultima_avaliacao: Dictionary = {}
 
+var gerenciador_atividades: Node
+
+func definir_gerenciador(novo_gerenciador: Node) -> void:
+	gerenciador_atividades = novo_gerenciador
+
 func iniciar_partida() -> void:
-	produtividade = 3
-	energia = 6
-	saude_mental = 6
+	produtividade = 5
+	energia = 8
+	saude_mental = 7
 	indice_dia = 0
 	itens.clear()
 	atividades_concluidas.clear()
@@ -65,7 +71,10 @@ func restaurar_partida(dados: Dictionary) -> void:
 func nome_dia() -> String:
 	return DIAS[indice_dia]
 
-func aplicar_atividade(atividade: Atividade) -> bool:
+func aplicar_atividade(
+	atividade: Atividade,
+	concluida_com_atraso: bool = false
+) -> bool:
 	if not iniciado or atividades_concluidas.has(atividade.id):
 		return false
 	if atividade.item_necessario != "" and not itens.has(atividade.item_necessario):
@@ -78,13 +87,43 @@ func aplicar_atividade(atividade: Atividade) -> bool:
 	atividades_concluidas[atividade.id] = true
 	if atividade.grupo_escolha != "":
 		grupos_escolhidos[atividade.grupo_escolha] = true
-	alterar_atributos(atividade.produtividade, atividade.energia, atividade.saude_mental)
+	
+	var produtividade_aplicada := atividade.produtividade
+	var saude_mental_aplicada := atividade.saude_mental
+
+	if concluida_com_atraso:
+		if produtividade_aplicada > 0:
+			produtividade_aplicada = max(
+				0,
+				produtividade_aplicada - 1
+			)
+
+		saude_mental_aplicada -= 1
+
+	alterar_atributos(
+		produtividade_aplicada,
+		atividade.energia,
+		saude_mental_aplicada
+	)
+	
 	inventario_alterado.emit(itens)
 	agenda_alterada.emit()
 	var texto := atividade.descricao
+	var titulo := atividade.nome
+
 	if atividade.item_concedido != "":
 		texto += "\nItem recebido: %s." % atividade.item_concedido
-	notificacao_recebida.emit(atividade.nome, texto)
+
+	if concluida_com_atraso:
+		titulo = "Entrega atrasada"
+		texto = (
+			"Você concluiu %s, mas terminou após o horário combinado.\n"
+			% atividade.nome
+		)
+		texto += "Produtividade reduzida em 1 e Saúde Mental reduzida em 1 adicional."
+
+	notificacao_recebida.emit(titulo, texto)
+
 	return true
 
 func alterar_atributos(p: int, e: int, s: int) -> void:
@@ -93,22 +132,41 @@ func alterar_atributos(p: int, e: int, s: int) -> void:
 	saude_mental = clampi(saude_mental + s, 0, 10)
 	atributos_alterados.emit(produtividade, energia, saude_mental)
 	_avaliar_esgotamento()
-
+	
 func verificar_prazos(minutos_do_dia: float) -> void:
 	if not iniciado:
 		return
+
 	for atividade in obter_atividades():
-		if not atividade.usa_hora_inicio_como_prazo:
+		if not atividade.tem_prazo:
 			continue
+
 		if atividades_concluidas.has(atividade.id) or tarefas_perdidas.has(atividade.id):
 			continue
-		if minutos_do_dia >= atividade.hora_inicio * 60:
+
+		var minuto_prazo: int = atividade.hora_prazo * 60
+
+		if minutos_do_dia >= minuto_prazo:
 			tarefas_perdidas[atividade.id] = true
+
 			alterar_atributos(-1, 0, -1)
+
 			agenda_alterada.emit()
 			prazo_perdido.emit(atividade)
-			notificacao_recebida.emit("Prazo perdido", "%s não foi concluída até %02d:00. Produtividade e Saúde Mental diminuíram." % [atividade.nome, atividade.hora_inicio])
 
+		if atividade.tipo_compromisso == Atividade.TipoCompromisso.HORARIO_MARCADO:
+			notificacao_recebida.emit(
+				"Compromisso perdido",
+				"Você não compareceu a %s até %02d:00. Produtividade e Saúde Mental diminuíram."
+				% [atividade.nome,atividade.hora_prazo]
+			)
+		else:
+			notificacao_recebida.emit(
+				"Prazo perdido",
+				"%s não foi concluída até %02d:00. Produtividade e Saúde Mental diminuíram."
+				% [atividade.nome,atividade.hora_prazo]
+			)
+			
 func _avaliar_esgotamento() -> void:
 	var novo_estado := energia <= 2 or saude_mental <= 2
 	if novo_estado == em_esgotamento:
@@ -162,19 +220,16 @@ func obter_avaliacao(vitoria := resultado_final) -> Dictionary:
 func obter_atividades() -> Array[Atividade]:
 	var dia := indice_dia
 	var atividades: Array[Atividade] = [
-		Atividade.criar("almoco_%d" % dia, "Almoço", "Restaurante Saudável", "Uma refeição equilibrada recupera seu ritmo.", 45, 0, 2, 1, 11, 14),
-		Atividade.criar("lanche_%d" % dia, "Lanche", "Fast Food", "Uma solução rápida para a fome.", 30, 0, 1, 0, 10, 22),
-		Atividade.criar("caminhar_%d" % dia, "Caminhar", "Parque", "Um intervalo para respirar e reorganizar os pensamentos.", 45, 0, -1, 2, 8, 17),
-		Atividade.criar("correr_%d" % dia, "Correr", "Parque", "Movimento intenso para aliviar a pressão.", 45, 0, -2, 2, 17, 21),
 		Atividade.criar("amigos_%d" % dia, "Encontrar amigos", "Parque", "Conexão também faz parte da rotina.", 60, 0, -1, 2, 17, 22),
 		Atividade.criar("dormir_%d" % dia, "Dormir", "Casa", "Encerre o dia e recupere parte das forças.", 1, 0, 0, 0, 20, 24)
 	]
-	atividades.append(Atividade.criar("estudar_%d" % dia, "Estudar em silencio", "Biblioteca", "Um tempo tranquilo para organizar os pensamentos.", 35, 0, -1, 2, 9, 17))
-	atividades.append(Atividade.criar("financas_%d" % dia, "Organizar financas", "Banco", "Planejar as contas reduz a pressao da semana.", 25, 0, 1, 1, 9, 16))
+	
+	if gerenciador_atividades != null:
+		atividades.append_array(
+		gerenciador_atividades.obter_atividades_catalogo()
+	)
 	match dia:
-		0: atividades.append(Atividade.criar("relatorio", "Relatório", "Empresa", "Um avanço importante no projeto da semana.", 60, 2, -3, -2, 9, 17, "", false, "", false, true))
 		1:
-			atividades.append(Atividade.criar("consulta", "Consulta", "Clínica", "A consulta ajuda você a cuidar de si.", 60, 0, -1, 1, 9, 17, "", false, "Receita", false, true))
 			atividades.append(Atividade.criar("remedio", "Retirar remédio", "Farmácia", "Com o tratamento em dia, o peso da semana diminui.", 15, 0, 1, 2, 10, 20, "Receita", true, "", false, true))
 			atividades.append(Atividade.criar("hora_extra", "Hora extra", "Empresa", "Você ganha visibilidade, mas sacrifica seu descanso.", 90, 3, -4, -3, 15, 17, "", false, "", true, true, "decisao_tarde"))
 			atividades.append(Atividade.criar("tempo_pessoal", "Proteger seu tempo", "Empresa", "Você recusa a hora extra e preserva seu equilíbrio.", 30, 0, 0, 2, 15, 17, "", false, "", true, true, "decisao_tarde"))
@@ -193,22 +248,44 @@ func obter_atividades() -> Array[Atividade]:
 
 func obter_proxima_tarefa(minutos_do_dia := 0.0) -> Atividade:
 	var proxima: Atividade = null
+
 	for atividade in obter_atividades():
-		if atividade.local == "Biblioteca" or atividade.local == "Banco":
+		if not atividade.tem_prazo:
 			continue
-		if atividade.local in ["Casa", "Restaurante Saudável", "Fast Food", "Parque"] or atividade_bloqueada(atividade):
+
+		if atividade_bloqueada(atividade):
 			continue
-		if atividade.usa_hora_inicio_como_prazo and minutos_do_dia >= atividade.hora_inicio * 60:
+
+		var minuto_prazo: int = atividade.hora_prazo * 60
+
+		if minutos_do_dia >= minuto_prazo:
 			continue
-		if proxima == null or atividade.hora_inicio < proxima.hora_inicio:
+
+		if proxima == null or atividade.hora_prazo < proxima.hora_prazo:
 			proxima = atividade
+
 	return proxima
 
 func atividade_bloqueada(atividade: Atividade) -> bool:
 	return atividades_concluidas.has(atividade.id) or tarefas_perdidas.has(atividade.id) or (atividade.grupo_escolha != "" and grupos_escolhidos.has(atividade.grupo_escolha))
 
 func notificar_dia() -> void:
-	var destaque := obter_atividades().filter(func(a: Atividade): return a.especial or a.local == "Empresa")
-	if not destaque.is_empty():
-		var atividade: Atividade = destaque[0]
-		notificacao_recebida.emit("Agenda de %s" % nome_dia(), "%s — %s (até %02d:00)" % [atividade.nome, atividade.local, atividade.hora_inicio])
+	var proxima := obter_proxima_tarefa(0.0)
+
+	if proxima == null:
+		notificacao_recebida.emit(
+			"Agenda de %s" % nome_dia(),
+			"Você não possui compromissos com prazo para hoje."
+		)
+		return
+
+	notificacao_recebida.emit(
+		"Agenda de %s" % nome_dia(),
+		"%s — %s\nEntrega até: %02d:00\nTempo para executar: %d min"
+		% [
+			proxima.nome,
+			proxima.local,
+			proxima.hora_prazo,
+			proxima.duracao_minutos
+		]
+	)

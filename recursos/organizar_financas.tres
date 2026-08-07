@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://dcgj5fftiuypw"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_tbm6a"]
+
+[resource]
+script = ExtResource("1_tbm6a")
+id = "financas"
+nome = "Organizar finanças"
+local = "Banco"
+descricao = "Resolver pendências reduz preocupações."
+produtividade = 1
+energia = -1
+saude_mental = 1
+duracao_minutos = 45
+hora_inicio = 10
+hora_fim = 16
+metadata/_custom_type_script = "uid://6can3qouvgtc"

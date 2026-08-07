@@ -4,12 +4,12 @@
 
 [resource]
 script = ExtResource("1_37xyr")
-energia = -20.0
-saude_mental = 15.0
+id = "correr"
+nome = "Correr"
+local = "Parque"
+descricao = "Exercício mais intenso para aliviar a tensão."
+energia = -2
+saude_mental = 3
 duracao_minutos = 45
-tem_restricao_horario = true
-hora_inicio = 18
-hora_fim = 21
-duracao_disponibilidade_minutos = 60
-chance_surgimento = 0.4
+hora_fim = 20
 metadata/_custom_type_script = "uid://6can3qouvgtc"

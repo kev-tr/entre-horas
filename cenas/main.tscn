@@ -28,6 +28,15 @@
 [ext_resource type="Script" uid="uid://c8srbohw0u0i3" path="res://scripts/audio.gd" id="26_audio"]
 [ext_resource type="AudioStream" uid="uid://bqtscvchba63l" path="res://sound/ambient.mp3" id="27_ambient"]
 [ext_resource type="Script" uid="uid://1bc3ijsc813g" path="res://scripts/salvamento.gd" id="28_save"]
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="29_xy25r"]
+[ext_resource type="Resource" uid="uid://dc1htpwdsy0sn" path="res://recursos/almoco.tres" id="30_hbnce"]
+[ext_resource type="Resource" uid="uid://gr8aelgh5uxr" path="res://recursos/lanche.tres" id="31_2nh74"]
+[ext_resource type="Resource" uid="uid://dc4wi33d1p0o5" path="res://recursos/caminhar.tres" id="32_hbnce"]
+[ext_resource type="Resource" uid="uid://dxew5qjbxcia6" path="res://recursos/correr.tres" id="33_2nh74"]
+[ext_resource type="Resource" uid="uid://pqn7mtwbjco2" path="res://recursos/estudar.tres" id="34_ql61m"]
+[ext_resource type="Resource" uid="uid://bjy4abg6tck0v" path="res://recursos/jantar.tres" id="35_exa4p"]
+[ext_resource type="Resource" uid="uid://cckiya773ongk" path="res://recursos/relatorio.tres" id="36_q11wc"]
+[ext_resource type="Resource" uid="uid://c40blkntgl7hb" path="res://recursos/consulta.tres" id="37_q11wc"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iwfo7"]
 texture = ExtResource("1_bhvw8")
@@ -15319,3 +15328,4 @@ script = ExtResource("28_save")
 
 [node name="GerenciadorAtividades" type="Node" parent="." unique_id=1992620330]
 script = ExtResource("23_7lu6d")
+catalogo_atividades = Array[ExtResource("29_xy25r")]([ExtResource("30_hbnce"), ExtResource("31_2nh74"), ExtResource("32_hbnce"), ExtResource("33_2nh74"), ExtResource("34_ql61m"), ExtResource("35_exa4p"), ExtResource("36_q11wc"), ExtResource("37_q11wc")])

@@ -41,7 +41,19 @@ func _realizar_atividade() -> void:
 		if estado.iniciado:
 			relogio.iniciar_dia()
 		return
-	if estado.aplicar_atividade(atividade):
+	
+	var concluida_com_atraso := false
+
+	if atividade.tem_prazo:
+		var minuto_prazo: int = atividade.hora_prazo * 60
+		var minuto_conclusao: float = (
+			relogio.minutos_atuais
+			+ atividade.duracao_minutos
+		)
+
+		concluida_com_atraso = minuto_conclusao > minuto_prazo
+	
+	if estado.aplicar_atividade(atividade, concluida_com_atraso):
 		get_node("../Audio").tocar_confirmacao()
 		confirmando_sono = false
 		relogio.avancar_tempo(atividade.duracao_minutos)

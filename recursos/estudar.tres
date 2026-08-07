@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://pqn7mtwbjco2"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_hawkd"]
+
+[resource]
+script = ExtResource("1_hawkd")
+id = "estudar"
+nome = "Estudar em silêncio"
+local = "Biblioteca"
+descricao = "Um tempo tranquilo para organizar os pensamentos."
+produtividade = 1
+energia = -1
+saude_mental = 1
+duracao_minutos = 60
+hora_fim = 18
+metadata/_custom_type_script = "uid://6can3qouvgtc"

@@ -4,13 +4,20 @@
 
 [resource]
 script = ExtResource("1_7bor3")
+dias_disponiveis = Array[int]([1])
+id = "consulta"
 nome = "Consulta"
-energia = -5.0
-saude_mental = 10.0
+local = "Clínica"
+descricao = "Um acompanhamento médico ajuda você a cuidar de si."
+energia = -1
+saude_mental = 1
 duracao_minutos = 60
-tem_restricao_horario = true
-hora_inicio = 9
+hora_inicio = 15
 hora_fim = 17
-duracao_disponibilidade_minutos = 90
-chance_surgimento = 0.5
+tem_prazo = true
+hora_prazo = 16
+tipo = 0
+tipo_compromisso = 2
+exibir_na_agenda = true
+item_concedido = "Receita"
 metadata/_custom_type_script = "uid://6can3qouvgtc"

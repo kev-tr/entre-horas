@@ -4,11 +4,20 @@
 
 [resource]
 script = ExtResource("1_3h4g5")
+dias_disponiveis = Array[int]([0, 2])
+id = "relatorio"
 nome = "Relatório"
-produtividade = 20.0
-energia = -15.0
-saude_mental = -10.0
+local = "Empresa"
+descricao = "Uma entrega importante do trabalho precisa ser concluída dentro do prazo."
+produtividade = 2
+energia = -3
+saude_mental = -2
 duracao_minutos = 90
-duracao_disponibilidade_minutos = 120
-chance_surgimento = 0.6
+hora_inicio = 9
+hora_fim = 17
+tem_prazo = true
+hora_prazo = 12
+tipo = 0
+tipo_compromisso = 1
+exibir_na_agenda = true
 metadata/_custom_type_script = "uid://6can3qouvgtc"

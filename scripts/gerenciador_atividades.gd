@@ -1,11 +1,40 @@
 extends Node
 
+@export_category("Catálogo de Atividades")
+@export var catalogo_atividades: Array[Atividade] = []
+
 @onready var estado: EstadoPartida = $"../EstadoPartida"
 @onready var relogio = $"../Relogio"
 
 var locais: Dictionary = {}
 
+func preparar_atividade_diaria(atividade_base: Atividade) -> Atividade:
+	var atividade: Atividade = atividade_base.duplicate(true)
+	atividade.id = "%s_%d" % [atividade_base.id, estado.indice_dia]
+	return atividade
+	
+func obter_atividades_catalogo() -> Array[Atividade]:
+	var atividades: Array[Atividade] = []
+
+	for atividade_base in catalogo_atividades:
+		if atividade_base == null:
+			continue
+
+		if (
+			not atividade_base.dias_disponiveis.is_empty()
+			and not atividade_base.dias_disponiveis.has(estado.indice_dia)
+		):
+			continue
+
+		atividades.append(
+			preparar_atividade_diaria(atividade_base)
+		)
+
+	return atividades
+
 func _ready() -> void:
+	estado.definir_gerenciador(self)
+	
 	locais = {
 		"Casa": $"../InteracaoCasa", "Empresa": $"../InteracaoEmpresa", "Clínica": $"../InteracaoClinica",
 		"Restaurante Saudável": $"../InteracaoRestaurante", "Fast Food": $"../InteracaoFastFood",
@@ -26,7 +55,7 @@ func _atualizar_pontos(_nome_dia = "", _indice_dia = 0) -> void:
 			if ponto.atividade_atual != null:
 				ponto.mostrar_atividade_atual()
 			else:
-				ponto.hud.mostrar_interacao("Indisponível", "Não há atividade viável aqui agora. Consulte a agenda para o próximo prazo.")
+				ponto.hud.mostrar_interacao("Indisponível", "Não há atividade neste estabelecimento agora.", false)
 
 func _atividades_para_local(local: String) -> Array[Atividade]:
 	var disponiveis: Array[Atividade] = []

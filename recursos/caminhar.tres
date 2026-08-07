@@ -4,12 +4,12 @@
 
 [resource]
 script = ExtResource("1_6d44f")
+id = "caminhar"
 nome = "Caminhar"
-energia = -10.0
-saude_mental = 10.0
+local = "Parque"
+descricao = "Um intervalo para respirar e reorganizar os pensamentos."
+energia = -1
+saude_mental = 2
 duracao_minutos = 45
-tem_restricao_horario = true
-hora_fim = 12
-duracao_disponibilidade_minutos = 120
-chance_surgimento = 0.4
+hora_fim = 20
 metadata/_custom_type_script = "uid://6can3qouvgtc"

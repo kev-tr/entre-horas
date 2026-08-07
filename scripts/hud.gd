@@ -60,6 +60,7 @@ func preparar(novo_estado: EstadoPartida) -> void:
 	estado.atributos_alterados.connect(atualizar_atributos)
 	estado.dia_alterado.connect(_atualizar_dia)
 	estado.notificacao_recebida.connect(mostrar_mensagem)
+	estado.aviso_importante.connect(mostrar_aviso_importante)
 	estado.inventario_alterado.connect(_atualizar_inventario)
 	estado.agenda_alterada.connect(_atualizar_agenda)
 
@@ -112,9 +113,21 @@ func atualizar_relogio(horario: String) -> void:
 		minutos_do_dia = partes[0].to_int() * 60 + partes[1].to_int()
 		_atualizar_agenda()
 
-func mostrar_interacao(nome_atividade: String, descricao := "") -> void:
+func mostrar_interacao(
+	nome_atividade: String,
+	descricao := "",
+	pode_realizar := true
+) -> void:
 	label_atividade.text = nome_atividade
-	label_instrucao.text = (descricao + "\n" if descricao != "" else "") + "[ESPAÇO] realizar"
+
+	if pode_realizar:
+		label_instrucao.text = (
+			(descricao + "\n" if descricao != "" else "")
+			+ "[ESPAÇO] realizar"
+		)
+	else:
+		label_instrucao.text = descricao
+
 	painel_interacao.visible = true
 
 func esconder_interacao() -> void:
@@ -126,6 +139,16 @@ func mostrar_mensagem(titulo: String, descricao: String) -> void:
 	notificacao.visible = true
 	var timer := get_tree().create_timer(4.0)
 	timer.timeout.connect(func(): notificacao.visible = false)
+
+func mostrar_aviso_importante(titulo: String, descricao: String) -> void:
+	_montar_overlay(
+		titulo,
+		descricao,
+		"CONTINUAR",
+		func(): esconder_telas(),
+		"",
+		""
+	)
 
 func mostrar_menu(pode_retomar := false) -> void:
 	menu_pode_retomar = pode_retomar
@@ -290,14 +313,7 @@ func _atualizar_agenda() -> void:
 	var atividades_exibidas: Array = []
 
 	for atividade in estado.obter_atividades():
-		if atividade.local in [
-			"Biblioteca",
-			"Banco",
-			"Casa",
-			"Restaurante Saudável",
-			"Fast Food",
-			"Parque"
-		]:
+		if not atividade.exibir_na_agenda:
 			continue
 
 		atividades_exibidas.append(atividade)
@@ -323,16 +339,33 @@ func _atualizar_agenda() -> void:
 			marca = "✕"
 
 		var label := Label.new()
+		var detalhe_compromisso := ""
+
+		if atividade.tipo_compromisso == Atividade.TipoCompromisso.HORARIO_MARCADO:
+			detalhe_compromisso = (
+				"   Horário marcado: %02d:00\n"
+				+ "   Disponível a partir de: %02d:00"
+			) % [
+				atividade.hora_prazo,
+				atividade.hora_inicio
+			]
+		else:
+			detalhe_compromisso = (
+				"   Entrega até: %02d:00"
+				% atividade.hora_prazo
+			)
 
 		label.text = (
-			"%s ATÉ %02d:00 — %s\n   %s"
-			% [
-				marca,
-				atividade.hora_inicio,
-				atividade.nome,
-				atividade.local
-			]
-		)
+			"%s %s - %s\n"
+			+ "%s\n"
+			+ "   Tempo para executar: %d min"
+		) % [
+			marca,
+			atividade.nome,
+			atividade.local,
+			detalhe_compromisso,
+			atividade.duracao_minutos
+		]
 
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
@@ -342,7 +375,7 @@ func _atualizar_agenda() -> void:
 			and not estado.atividades_concluidas.has(atividade.id)
 			and not estado.tarefas_perdidas.has(atividade.id)
 		):
-			var restantes: int = int(atividade.hora_inicio * 60) - minutos_do_dia
+			var restantes: int = int(atividade.hora_prazo * 60) - minutos_do_dia
 
 			var cor_urgencia := (
 				COR_ACENTO
