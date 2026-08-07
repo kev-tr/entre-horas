@@ -289,18 +289,7 @@ func _atualizar_agenda() -> void:
 
 	var atividades_exibidas: Array = []
 
-	for atividade in estado.obter_atividades():
-		if atividade.local in [
-			"Biblioteca",
-			"Banco",
-			"Casa",
-			"Restaurante Saudável",
-			"Fast Food",
-			"Parque"
-		]:
-			continue
-
-		atividades_exibidas.append(atividade)
+	atividades_exibidas.assign(estado.obter_tarefas_da_agenda())
 
 	if atividades_exibidas.is_empty():
 		var label := Label.new()

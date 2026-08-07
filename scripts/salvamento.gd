@@ -15,7 +15,7 @@ func salvar_partida(estado: EstadoPartida, minutos: float) -> void:
 		"produtividade": estado.produtividade, "energia": estado.energia, "saude_mental": estado.saude_mental,
 		"indice_dia": estado.indice_dia, "itens": estado.itens,
 		"concluidas": estado.atividades_concluidas.keys(), "perdidas": estado.tarefas_perdidas.keys(),
-		"grupos": estado.grupos_escolhidos.keys(), "minutos": minutos
+		"grupos": estado.grupos_escolhidos.keys(), "cadeias_diarias": estado.cadeias_diarias, "minutos": minutos
 	}
 	_gravar()
 

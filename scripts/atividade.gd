@@ -27,6 +27,7 @@ extends Resource
 @export var item_concedido: String = ""
 @export var especial: bool = false
 @export var grupo_escolha: String = ""
+@export var atividade_precedente: String = ""
 
 func esta_disponivel(minutos_do_dia: float) -> bool:
 	if usa_hora_inicio_como_prazo:
@@ -43,7 +44,7 @@ func pode_ser_concluida(minutos_do_dia: float) -> bool:
 static func criar(
 	atividade_id: String, titulo: String, destino: String, texto: String,
 	duracao: int, p: int, e: int, s: int, inicio: int, fim: int,
-	necessario := "", consome := false, concedido := "", is_especial := false, usa_prazo := false, grupo := ""
+	necessario := "", consome := false, concedido := "", is_especial := false, usa_prazo := false, grupo := "", precedente := ""
 ) -> Atividade:
 	var atividade := Atividade.new()
 	atividade.id = atividade_id
@@ -62,4 +63,5 @@ static func criar(
 	atividade.item_concedido = concedido
 	atividade.especial = is_especial
 	atividade.grupo_escolha = grupo
+	atividade.atividade_precedente = precedente
 	return atividade

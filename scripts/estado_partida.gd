@@ -25,6 +25,16 @@ var iniciado := false
 var resultado_final := false
 var em_esgotamento := false
 var ultima_avaliacao: Dictionary = {}
+var cadeias_diarias: Dictionary = {}
+
+const POOL_CADEIA := [
+	{"nome": "Organizar prioridades", "local": "Empresa", "descricao": "Reordene as entregas para manter o projeto em movimento.", "p": 2, "e": -2, "s": -1},
+	{"nome": "Retorno médico", "local": "Clínica", "descricao": "Uma conversa de cuidado ajuda a sustentar a rotina.", "p": 1, "e": -1, "s": 2},
+	{"nome": "Resolver pendencia", "local": "Banco", "descricao": "Regularize uma pendencia financeira e alivie a pressao.", "p": 1, "e": 1, "s": 1},
+	{"nome": "Pesquisa orientada", "local": "Biblioteca", "descricao": "Busque referencias para tomar uma decisao melhor.", "p": 2, "e": -1, "s": 1},
+	{"nome": "Caminhada de planejamento", "local": "Parque", "descricao": "Organize as proximas decisoes enquanto recupera o folego.", "p": 1, "e": -1, "s": 2},
+	{"nome": "Almoço com cliente", "local": "Restaurante Saudável", "descricao": "Uma conversa profissional durante a refeição abre caminhos.", "p": 1, "e": 1, "s": 1}
+]
 
 func iniciar_partida() -> void:
 	produtividade = 3
@@ -35,6 +45,8 @@ func iniciar_partida() -> void:
 	atividades_concluidas.clear()
 	tarefas_perdidas.clear()
 	grupos_escolhidos.clear()
+	cadeias_diarias.clear()
+	_sortear_cadeia_do_dia()
 	iniciado = true
 	em_esgotamento = false
 	ultima_avaliacao.clear()
@@ -54,6 +66,9 @@ func restaurar_partida(dados: Dictionary) -> void:
 	for id in dados.get("concluidas", []): atividades_concluidas[str(id)] = true
 	for id in dados.get("perdidas", []): tarefas_perdidas[str(id)] = true
 	for id in dados.get("grupos", []): grupos_escolhidos[str(id)] = true
+	cadeias_diarias = dados.get("cadeias_diarias", {})
+	if cadeias_diarias.is_empty():
+		_sortear_cadeia_do_dia()
 	iniciado = true
 	resultado_final = false
 	em_esgotamento = energia <= 2 or saude_mental <= 2
@@ -67,6 +82,8 @@ func nome_dia() -> String:
 
 func aplicar_atividade(atividade: Atividade) -> bool:
 	if not iniciado or atividades_concluidas.has(atividade.id):
+		return false
+	if not atividade_revelada(atividade):
 		return false
 	if atividade.item_necessario != "" and not itens.has(atividade.item_necessario):
 		notificacao_recebida.emit("Item necessário", "Você precisa de %s." % atividade.item_necessario)
@@ -85,6 +102,7 @@ func aplicar_atividade(atividade: Atividade) -> bool:
 	if atividade.item_concedido != "":
 		texto += "\nItem recebido: %s." % atividade.item_concedido
 	notificacao_recebida.emit(atividade.nome, texto)
+	_notificar_tarefas_reveladas(atividade.id)
 	return true
 
 func alterar_atributos(p: int, e: int, s: int) -> void:
@@ -100,6 +118,8 @@ func verificar_prazos(minutos_do_dia: float) -> void:
 	for atividade in obter_atividades():
 		if not atividade.usa_hora_inicio_como_prazo:
 			continue
+		if not atividade_revelada(atividade):
+			continue
 		if atividades_concluidas.has(atividade.id) or tarefas_perdidas.has(atividade.id):
 			continue
 		if minutos_do_dia >= atividade.hora_inicio * 60:
@@ -107,6 +127,7 @@ func verificar_prazos(minutos_do_dia: float) -> void:
 			alterar_atributos(-1, 0, -1)
 			agenda_alterada.emit()
 			prazo_perdido.emit(atividade)
+			_notificar_tarefas_reveladas(atividade.id)
 			notificacao_recebida.emit("Prazo perdido", "%s não foi concluída até %02d:00. Produtividade e Saúde Mental diminuíram." % [atividade.nome, atividade.hora_inicio])
 
 func _avaliar_esgotamento() -> void:
@@ -130,6 +151,7 @@ func avancar_dia(mensagem: String) -> void:
 		finalizar_semana()
 		return
 	indice_dia += 1
+	_sortear_cadeia_do_dia()
 	dia_alterado.emit(nome_dia(), indice_dia)
 	notificacao_recebida.emit("Novo dia", mensagem)
 	notificar_dia()
@@ -189,11 +211,66 @@ func obter_atividades() -> Array[Atividade]:
 		atividades.append(Atividade.criar("alinhamento", "Alinhamento", "Empresa", "Uma conversa curta evita retrabalho no fim da semana.", 20, 1, -2, -1, 10, 17, "", false, "", false, true))
 	elif dia == 4:
 		atividades.append(Atividade.criar("apresentacao", "Apresentar entrega", "Empresa", "Defenda o resultado para encerrar a semana.", 25, 1, -2, -1, 11, 17, "", false, "", true, true))
+	for atividade in atividades:
+		if atividade.id in ["relatorio", "consulta", "remedio", "hora_extra", "tempo_pessoal", "reuniao", "plano", "entrega", "revisao_relatorio", "ata_reuniao", "alinhamento", "apresentacao"]:
+			atividade.atividade_precedente = "_legado"
+	atividades.append(Atividade.criar("respirar_%d" % dia, "Respirar no parque", "Parque", "Uma pausa ao ar livre recupera sua Saude Mental.", 20, 0, 0, 2, 8, 24))
+	atividades.append_array(_criar_tarefas_da_cadeia(dia))
 	return atividades
+
+func _sortear_cadeia_do_dia() -> void:
+	var opcoes: Array = POOL_CADEIA.duplicate(true)
+	opcoes.shuffle()
+	cadeias_diarias[indice_dia] = opcoes.slice(0, 3)
+
+func _criar_tarefas_da_cadeia(dia: int) -> Array[Atividade]:
+	if not cadeias_diarias.has(dia) and not cadeias_diarias.has(str(dia)):
+		_sortear_cadeia_do_dia()
+	var tarefas: Array[Atividade] = []
+	var definicoes: Array = cadeias_diarias.get(dia, cadeias_diarias.get(str(dia), []))
+	for indice in definicoes.size():
+		var definicao: Dictionary = definicoes[indice]
+		var id := "cadeia_%d_%d" % [dia, indice]
+		var anterior := "" if indice == 0 else "cadeia_%d_%d" % [dia, indice - 1]
+		var local := _normalizar_local(str(definicao.local))
+		tarefas.append(Atividade.criar(id, definicao.nome, local, definicao.descricao, 30, definicao.p, definicao.e, definicao.s, 11 + indice * 3, 19, "", false, "", false, true, "", anterior))
+	return tarefas
+
+func _normalizar_local(local: String) -> String:
+	match local:
+		"ClÃ­nica": return "Clínica"
+		"Restaurante SaudÃ¡vel": return "Restaurante Saudável"
+		_: return local
+
+func atividade_revelada(atividade: Atividade) -> bool:
+	return atividade.atividade_precedente == "" or atividades_concluidas.has(atividade.atividade_precedente) or tarefas_perdidas.has(atividade.atividade_precedente)
+
+func _notificar_tarefas_reveladas(id_anterior: String) -> void:
+	for atividade in obter_atividades():
+		if atividade.atividade_precedente == id_anterior and atividade.hora_inicio < 19:
+			notificacao_recebida.emit("Nova tarefa", "%s foi liberada. Prazo: %02d:00." % [atividade.nome, atividade.hora_inicio])
+
+func obter_tarefas_da_agenda() -> Array[Atividade]:
+	var tarefas: Array[Atividade] = []
+	for atividade in obter_atividades():
+		if atividade.id.begins_with("cadeia_") and atividade_revelada(atividade):
+			tarefas.append(atividade)
+	tarefas.sort_custom(func(a: Atividade, b: Atividade): return a.hora_inicio < b.hora_inicio)
+	return tarefas
 
 func obter_proxima_tarefa(minutos_do_dia := 0.0) -> Atividade:
 	var proxima: Atividade = null
 	for atividade in obter_atividades():
+		if atividade.id.begins_with("cadeia_"):
+			if not atividade_revelada(atividade) or atividade_bloqueada(atividade):
+				continue
+			if minutos_do_dia >= atividade.hora_inicio * 60:
+				continue
+			if proxima == null or atividade.hora_inicio < proxima.hora_inicio:
+				proxima = atividade
+			continue
+		if not atividade_revelada(atividade):
+			continue
 		if atividade.local == "Biblioteca" or atividade.local == "Banco":
 			continue
 		if atividade.local in ["Casa", "Restaurante Saudável", "Fast Food", "Parque"] or atividade_bloqueada(atividade):
@@ -208,7 +285,6 @@ func atividade_bloqueada(atividade: Atividade) -> bool:
 	return atividades_concluidas.has(atividade.id) or tarefas_perdidas.has(atividade.id) or (atividade.grupo_escolha != "" and grupos_escolhidos.has(atividade.grupo_escolha))
 
 func notificar_dia() -> void:
-	var destaque := obter_atividades().filter(func(a: Atividade): return a.especial or a.local == "Empresa")
-	if not destaque.is_empty():
-		var atividade: Atividade = destaque[0]
+	var atividade := obter_proxima_tarefa()
+	if atividade != null:
 		notificacao_recebida.emit("Agenda de %s" % nome_dia(), "%s — %s (até %02d:00)" % [atividade.nome, atividade.local, atividade.hora_inicio])
