@@ -42,6 +42,13 @@ var personagem: Node2D
 var notificacao: PanelContainer
 var toast_titulo: Label
 var toast_texto: Label
+
+# Tutorial inicial
+var tutorial: PanelContainer
+var tutorial_titulo: Label
+var tutorial_texto: Label
+var tutorial_botao: Button
+
 var overlay: ColorRect
 var overlay_caixa: VBoxContainer
 var minutos_do_dia := 8 * 60
@@ -260,6 +267,8 @@ func mostrar_fim_do_dia() -> void:
 
 func esconder_telas() -> void:
 	overlay.visible = false
+	if tutorial != null:
+		tutorial.visible = false
 
 func _atualizar_dia(nome: String, _indice: int) -> void:
 	label_dia.text = nome.to_upper()
@@ -373,6 +382,42 @@ func _criar_interface_semana() -> void:
 	overlay_caixa.custom_minimum_size = Vector2(540, 0)
 	overlay_caixa.add_theme_constant_override("separation", 18)
 	centro.add_child(overlay_caixa)
+	
+		# Caixa central usada pelo tutorial inicial
+	tutorial = PanelContainer.new()
+	tutorial.custom_minimum_size = Vector2(500, 0)
+	tutorial.add_theme_stylebox_override("panel", _cartao(COR_ACENTO))
+	
+	var tutorial_centro := CenterContainer.new()
+	tutorial_centro.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tutorial_centro.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(tutorial_centro)
+
+	tutorial_centro.add_child(tutorial)
+	tutorial.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	var tutorial_box := VBoxContainer.new()
+	tutorial_box.add_theme_constant_override("separation", 14)
+	tutorial.add_child(tutorial_box)
+
+	tutorial_titulo = Label.new()
+	tutorial_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tutorial_titulo.add_theme_font_size_override("font_size", 24)
+	tutorial_titulo.add_theme_color_override("font_color", COR_ACENTO)
+	tutorial_box.add_child(tutorial_titulo)
+
+	tutorial_texto = Label.new()
+	tutorial_texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tutorial_texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tutorial_texto.add_theme_font_size_override("font_size", 17)
+	tutorial_box.add_child(tutorial_texto)
+
+	tutorial_botao = Button.new()
+	tutorial_botao.custom_minimum_size = Vector2(0, 44)
+	tutorial_botao.add_theme_font_size_override("font_size", 17)
+	tutorial_box.add_child(tutorial_botao)
+
+	tutorial.visible = false
 
 func _montar_overlay(titulo: String, texto: String, acao: String, callback: Callable, rotulo_secundario: String, texto_secundario: String) -> void:
 	for filho in overlay_caixa.get_children(): filho.queue_free()
@@ -397,6 +442,51 @@ func _montar_overlay(titulo: String, texto: String, acao: String, callback: Call
 	botao.pressed.connect(callback)
 	overlay_caixa.add_child(botao)
 	overlay.visible = true
+
+func mostrar_tutorial_inicial(ao_concluir: Callable) -> void:
+	_mostrar_passo_tutorial(0, ao_concluir)
+
+
+func _mostrar_passo_tutorial(passo: int, ao_concluir: Callable) -> void:
+	for conexao in tutorial_botao.pressed.get_connections():
+		tutorial_botao.pressed.disconnect(conexao.callable)
+
+	match passo:
+		0:
+			tutorial_titulo.text = "BEM-VINDO A ENTRE HORAS"
+			tutorial_texto.text = "Durante esta semana, concilie suas responsabilidades profissionais com sua Energia e Saúde Mental."
+			tutorial_botao.text = "PRÓXIMO"
+			tutorial_botao.pressed.connect(
+				func(): _mostrar_passo_tutorial(1, ao_concluir)
+			)
+
+		1:
+			tutorial_titulo.text = "MANTENHA O EQUILÍBRIO"
+			tutorial_texto.text = "Observe os três indicadores à direita. Suas atividades podem aumentar ou reduzir Produtividade, Energia e Saúde Mental."
+			tutorial_botao.text = "PRÓXIMO"
+			tutorial_botao.pressed.connect(
+				func(): _mostrar_passo_tutorial(2, ao_concluir)
+			)
+
+		2:
+			tutorial_titulo.text = "FIQUE DE OLHO NA AGENDA"
+			tutorial_texto.text = "Atividades com prazo aparecem na agenda. Vá ao local indicado antes do horário limite."
+			tutorial_botao.text = "PRÓXIMO"
+			tutorial_botao.pressed.connect(
+				func(): _mostrar_passo_tutorial(3, ao_concluir)
+			)
+
+		3:
+			tutorial_titulo.text = "EXPLORE A CIDADE"
+			tutorial_texto.text = "Movimente-se pelo mapa, aproxime-se dos locais e pressione ESPAÇO para realizar atividades."
+			tutorial_botao.text = "COMEÇAR"
+			tutorial_botao.pressed.connect(
+				func():
+					tutorial.visible = false
+					ao_concluir.call()
+			)
+
+	tutorial.visible = true
 
 func mostrar_pausa() -> void:
 	pausado = true

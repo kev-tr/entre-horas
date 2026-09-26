@@ -54,7 +54,6 @@ func iniciar_partida() -> void:
 	dia_alterado.emit(nome_dia(), indice_dia)
 	inventario_alterado.emit(itens)
 	agenda_alterada.emit()
-	notificar_dia()
 
 func restaurar_partida(dados: Dictionary) -> void:
 	produtividade = int(dados.get("produtividade", 3))

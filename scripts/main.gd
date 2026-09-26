@@ -14,6 +14,7 @@ var posicao_inicial_player: Vector2
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	hud.process_mode = Node.PROCESS_MODE_ALWAYS
+	player.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_adicionar_rotulos_de_locais()
 	hud.preparar(estado)
 	hud.definir_personagem($Player)
@@ -37,12 +38,18 @@ func _ready() -> void:
 	posicao_inicial_player = player.global_position
 
 func _iniciar_partida() -> void:
-	get_tree().paused = false
+	get_tree().paused = true
 	estado.iniciar_partida()
 	audio.iniciar_musica()
-	relogio.iniciar_dia()
 	gerenciador._atualizar_pontos()
 	hud.esconder_telas()
+	hud.mostrar_tutorial_inicial(_comecar_primeiro_dia)
+	
+func _comecar_primeiro_dia() -> void:
+	get_tree().paused = false
+	relogio.iniciar_dia()
+	hud.esconder_telas()
+	estado.notificar_dia()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
