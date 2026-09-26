@@ -45,6 +45,7 @@ enum TipoCompromisso {
 @export var tipo: TipoAtividade = TipoAtividade.LIVRE
 @export var tipo_compromisso: TipoCompromisso = TipoCompromisso.NENHUM
 @export var exibir_na_agenda: bool = false
+@export var sorteio_diario: bool = false
 
 @export_category("Inventario")
 @export var item_necessario: String = ""

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_7bor3")
-dias_disponiveis = Array[int]([1])
+dias_disponiveis = Array[int]([1, 2, 3])
 id = "consulta"
 nome = "Consulta"
 local = "Clínica"

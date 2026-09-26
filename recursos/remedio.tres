@@ -4,13 +4,17 @@
 
 [resource]
 script = ExtResource("1_4y2xt")
-nome = "Remédio"
-energia = 10.0
-saude_mental = 10.0
+dias_disponiveis = Array[int]([1, 2, 3, 4])
+id = "remedio"
+nome = "Comprar remédio"
+local = "Farmácia"
+descricao = "Com o tratamento em dia, o peso da semana diminui."
+energia = 1
+saude_mental = 2
 duracao_minutos = 15
-tem_restricao_horario = true
 hora_inicio = 10
 hora_fim = 20
-duracao_disponibilidade_minutos = 120
 chance_surgimento = 0.4
+item_necessario = "Receita"
+consome_item = true
 metadata/_custom_type_script = "uid://6can3qouvgtc"

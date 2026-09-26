@@ -7,14 +7,51 @@ extends Node
 @onready var relogio = $"../Relogio"
 
 var locais: Dictionary = {}
+var compromissos_sorteados: Dictionary = {}
 
 func preparar_atividade_diaria(atividade_base: Atividade) -> Atividade:
 	var atividade: Atividade = atividade_base.duplicate(true)
 	atividade.id = "%s_%d" % [atividade_base.id, estado.indice_dia]
 	return atividade
-	
+
+func obter_compromisso_sorteado_do_dia() -> Atividade:
+	var dia := estado.indice_dia
+
+	if compromissos_sorteados.has(dia):
+		var id_sorteado: String = compromissos_sorteados[dia]
+
+		for atividade_base in catalogo_atividades:
+			if atividade_base != null and atividade_base.id == id_sorteado:
+				return preparar_atividade_diaria(atividade_base)
+
+	var candidatos: Array[Atividade] = []
+
+	for atividade_base in catalogo_atividades:
+		if atividade_base == null:
+			continue
+
+		if not atividade_base.sorteio_diario:
+			continue
+
+		if (
+			not atividade_base.dias_disponiveis.is_empty()
+			and not atividade_base.dias_disponiveis.has(dia)
+		):
+			continue
+
+		candidatos.append(atividade_base)
+
+	if candidatos.is_empty():
+		return null
+
+	var escolhida: Atividade = candidatos.pick_random()
+	compromissos_sorteados[dia] = escolhida.id
+
+	return preparar_atividade_diaria(escolhida)
+
 func obter_atividades_catalogo() -> Array[Atividade]:
 	var atividades: Array[Atividade] = []
+	var compromisso_sorteado := obter_compromisso_sorteado_do_dia()
 
 	for atividade_base in catalogo_atividades:
 		if atividade_base == null:
@@ -26,9 +63,15 @@ func obter_atividades_catalogo() -> Array[Atividade]:
 		):
 			continue
 
+		if atividade_base.sorteio_diario:
+			continue
+
 		atividades.append(
 			preparar_atividade_diaria(atividade_base)
 		)
+
+	if compromisso_sorteado != null:
+		atividades.append(compromisso_sorteado)
 
 	return atividades
 

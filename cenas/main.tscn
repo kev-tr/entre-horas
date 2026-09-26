@@ -37,6 +37,13 @@
 [ext_resource type="Resource" uid="uid://bjy4abg6tck0v" path="res://recursos/jantar.tres" id="35_exa4p"]
 [ext_resource type="Resource" uid="uid://cckiya773ongk" path="res://recursos/relatorio.tres" id="36_q11wc"]
 [ext_resource type="Resource" uid="uid://c40blkntgl7hb" path="res://recursos/consulta.tres" id="37_q11wc"]
+[ext_resource type="Resource" uid="uid://6dk30nja0f21" path="res://recursos/entrega_projeto.tres" id="38_awuos"]
+[ext_resource type="Resource" uid="uid://c0hwv1wihmumn" path="res://recursos/proposta_cliente.tres" id="39_aywj2"]
+[ext_resource type="Resource" uid="uid://bdr6xyh65v6nf" path="res://recursos/reuniao_urgente.tres" id="40_syu2q"]
+[ext_resource type="Resource" uid="uid://dljm0umy0xqdo" path="res://recursos/incidente_critico.tres" id="41_4mqn4"]
+[ext_resource type="Resource" uid="uid://blqx5efxrjjs6" path="res://recursos/apresentacao_diretoria.tres" id="42_oinll"]
+[ext_resource type="Resource" uid="uid://bigrqds4j7wxr" path="res://recursos/treinamento_obrigatorio.tres" id="43_xxk7x"]
+[ext_resource type="Resource" uid="uid://bcccvchm7b1n2" path="res://recursos/remedio.tres" id="44_aywj2"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iwfo7"]
 texture = ExtResource("1_bhvw8")
@@ -15328,4 +15335,4 @@ script = ExtResource("28_save")
 
 [node name="GerenciadorAtividades" type="Node" parent="." unique_id=1992620330]
 script = ExtResource("23_7lu6d")
-catalogo_atividades = Array[ExtResource("29_xy25r")]([ExtResource("30_hbnce"), ExtResource("31_2nh74"), ExtResource("32_hbnce"), ExtResource("33_2nh74"), ExtResource("34_ql61m"), ExtResource("35_exa4p"), ExtResource("36_q11wc"), ExtResource("37_q11wc")])
+catalogo_atividades = Array[ExtResource("29_xy25r")]([ExtResource("30_hbnce"), ExtResource("31_2nh74"), ExtResource("32_hbnce"), ExtResource("33_2nh74"), ExtResource("34_ql61m"), ExtResource("35_exa4p"), ExtResource("36_q11wc"), ExtResource("37_q11wc"), ExtResource("38_awuos"), ExtResource("39_aywj2"), ExtResource("40_syu2q"), ExtResource("41_4mqn4"), ExtResource("42_oinll"), ExtResource("43_xxk7x"), ExtResource("44_aywj2")])

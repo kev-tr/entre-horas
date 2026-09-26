@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://blqx5efxrjjs6"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_nmdbs"]
+
+[resource]
+script = ExtResource("1_nmdbs")
+dias_disponiveis = Array[int]([2, 3, 4])
+id = "apresentacao_diretoria"
+nome = "Apresentação para a diretoria"
+local = "Empresa"
+descricao = "Apresente os resultados do trabalho e responda às questões da diretoria."
+produtividade = 3
+energia = -3
+saude_mental = -2
+duracao_minutos = 60
+hora_inicio = 14
+hora_fim = 16
+tem_prazo = true
+hora_prazo = 15
+tipo = 0
+tipo_compromisso = 2
+exibir_na_agenda = true
+sorteio_diario = true
+metadata/_custom_type_script = "uid://6can3qouvgtc"

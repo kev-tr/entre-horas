@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://6dk30nja0f21"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_vt0c7"]
+
+[resource]
+script = ExtResource("1_vt0c7")
+dias_disponiveis = Array[int]([3, 4])
+id = "entrega_projeto"
+nome = "Entrega de projeto"
+local = "Empresa"
+descricao = "Finalize e entregue uma etapa importante do projeto dentro do prazo."
+produtividade = 3
+energia = -3
+saude_mental = -2
+duracao_minutos = 120
+hora_fim = 18
+tem_prazo = true
+hora_prazo = 16
+tipo = 0
+tipo_compromisso = 1
+exibir_na_agenda = true
+sorteio_diario = true
+metadata/_custom_type_script = "uid://6can3qouvgtc"

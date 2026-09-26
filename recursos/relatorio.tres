@@ -20,4 +20,5 @@ hora_prazo = 12
 tipo = 0
 tipo_compromisso = 1
 exibir_na_agenda = true
+sorteio_diario = true
 metadata/_custom_type_script = "uid://6can3qouvgtc"

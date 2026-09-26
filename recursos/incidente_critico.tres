@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://dljm0umy0xqdo"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_1lp57"]
+
+[resource]
+script = ExtResource("1_1lp57")
+dias_disponiveis = Array[int]([0, 1, 2, 3, 4])
+id = "incidente_critico"
+nome = "Resolver incidente crítico"
+local = "Empresa"
+descricao = "Um problema inesperado exige uma solução rápida antes que afete o projeto."
+produtividade = 2
+energia = -3
+saude_mental = -2
+duracao_minutos = 90
+hora_inicio = 10
+hora_fim = 17
+tem_prazo = true
+hora_prazo = 13
+tipo = 0
+tipo_compromisso = 1
+exibir_na_agenda = true
+sorteio_diario = true
+metadata/_custom_type_script = "uid://6can3qouvgtc"

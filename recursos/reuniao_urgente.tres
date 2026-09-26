@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://bdr6xyh65v6nf"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_kv4tf"]
+
+[resource]
+script = ExtResource("1_kv4tf")
+dias_disponiveis = Array[int]([1, 2, 3])
+id = "reuniao_urgente"
+nome = "Reunião Urgente"
+local = "Empresa"
+descricao = "Uma reunião inesperada exige sua presença e atenção."
+produtividade = 2
+energia = -2
+saude_mental = -2
+duracao_minutos = 60
+hora_inicio = 13
+hora_fim = 15
+tem_prazo = true
+hora_prazo = 14
+tipo = 0
+tipo_compromisso = 2
+exibir_na_agenda = true
+sorteio_diario = true
+metadata/_custom_type_script = "uid://6can3qouvgtc"

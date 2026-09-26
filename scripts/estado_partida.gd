@@ -243,23 +243,6 @@ func obter_atividades() -> Array[Atividade]:
 		atividades.append_array(
 		gerenciador_atividades.obter_atividades_catalogo()
 	)
-	match dia:
-		1:
-			atividades.append(Atividade.criar("remedio", "Retirar remédio", "Farmácia", "Com o tratamento em dia, o peso da semana diminui.", 15, 0, 1, 2, 10, 20, "Receita", true, "", false, true))
-			atividades.append(Atividade.criar("hora_extra", "Hora extra", "Empresa", "Você ganha visibilidade, mas sacrifica seu descanso.", 90, 3, -4, -3, 15, 17, "", false, "", true, true, "decisao_tarde"))
-			atividades.append(Atividade.criar("tempo_pessoal", "Proteger seu tempo", "Empresa", "Você recusa a hora extra e preserva seu equilíbrio.", 30, 0, 0, 2, 15, 17, "", false, "", true, true, "decisao_tarde"))
-		2: atividades.append(Atividade.criar("reuniao", "Reunião urgente", "Empresa", "Evento especial: sua presença é necessária agora.", 90, 2, -3, -2, 10, 16, "", false, "", true, true))
-		3: atividades.append(Atividade.criar("plano", "Plano de carreira", "Empresa", "Você transforma esforço em direção profissional.", 60, 2, -3, -2, 9, 17, "", false, "", false, true))
-		4: atividades.append(Atividade.criar("entrega", "Entrega final", "Empresa", "A entrega fecha os compromissos da semana.", 90, 1, -3, -2, 10, 17, "", false, "", true, true))
-	if dia == 0:
-		atividades.append(Atividade.criar("revisao_relatorio", "Revisar relatorio", "Empresa", "A gerente pediu ajustes antes da reuniao de equipe.", 20, 1, -2, -1, 10, 17, "", false, "", true, true))
-	elif dia == 2:
-		atividades.append(Atividade.criar("ata_reuniao", "Enviar ata", "Empresa", "Registre os acordos enquanto a reuniao ainda esta fresca.", 20, 1, -2, -1, 11, 16, "", false, "", false, true))
-	elif dia == 3:
-		atividades.append(Atividade.criar("alinhamento", "Alinhamento", "Empresa", "Uma conversa curta evita retrabalho no fim da semana.", 20, 1, -2, -1, 10, 17, "", false, "", false, true))
-	elif dia == 4:
-		atividades.append(Atividade.criar("apresentacao", "Apresentar entrega", "Empresa", "Defenda o resultado para encerrar a semana.", 25, 1, -2, -1, 11, 17, "", false, "", true, true))
-
 	return atividades
 
 func atividade_revelada(atividade: Atividade) -> bool:

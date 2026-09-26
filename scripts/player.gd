@@ -44,7 +44,10 @@ func _realizar_atividade() -> void:
 	
 	var concluida_com_atraso := false
 
-	if atividade.tem_prazo:
+	if (
+		atividade.tem_prazo
+		and atividade.tipo_compromisso == Atividade.TipoCompromisso.PRAZO
+	):
 		var minuto_prazo: int = atividade.hora_prazo * 60
 		var minuto_conclusao: float = (
 			relogio.minutos_atuais

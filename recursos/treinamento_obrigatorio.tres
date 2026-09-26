@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="Atividade" format=3 uid="uid://bigrqds4j7wxr"]
+
+[ext_resource type="Script" uid="uid://6can3qouvgtc" path="res://scripts/atividade.gd" id="1_iob6v"]
+
+[resource]
+script = ExtResource("1_iob6v")
+dias_disponiveis = Array[int]([0, 1, 2, 3])
+id = "treinamento_obrigatorio"
+nome = "Treinamento obrigatório"
+local = "Empresa"
+descricao = "Participe de um treinamento necessário para acompanhar as novas demandas do trabalho."
+produtividade = 1
+energia = -2
+saude_mental = -1
+duracao_minutos = 120
+hora_inicio = 9
+hora_fim = 13
+tem_prazo = true
+hora_prazo = 11
+tipo = 0
+tipo_compromisso = 2
+exibir_na_agenda = true
+sorteio_diario = true
+metadata/_custom_type_script = "uid://6can3qouvgtc"
