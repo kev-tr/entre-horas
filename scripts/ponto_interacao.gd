@@ -1,6 +1,7 @@
 extends Area2D
 
 @onready var hud = $"../HUD"
+@onready var estado: EstadoPartida = $"../EstadoPartida"
 
 @export_enum(
 	"Empresa",
@@ -27,6 +28,7 @@ var marcador: Label
 var atividades_disponiveis: Array[Atividade] = []
 var indice_atividade := 0
 
+
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		player_na_area = body
@@ -34,8 +36,17 @@ func _on_body_entered(body: Node2D) -> void:
 
 		if atividade_atual != null:
 			mostrar_atividade_atual()
+
+			if hud.deve_mostrar_tutorial_espaco(estado.indice_dia):
+				hud.mostrar_tutorial_espaco()
+			elif atividades_disponiveis.size() > 1 and hud.deve_mostrar_tutorial_tab(estado.indice_dia):
+				hud.mostrar_tutorial_tab()
 		else:
-			hud.mostrar_interacao("Indisponível", "Não há atividade viável aqui agora. Consulte a agenda para o próximo prazo.")
+			hud.mostrar_interacao(
+				"Indisponível",
+				"Não há atividade viável aqui agora.\nConsulte a agenda para o próximo prazo.",
+				false
+			)
 
 		print("Player entrou em: ", tipo_local)
 

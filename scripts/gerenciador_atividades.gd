@@ -21,12 +21,26 @@ func _atualizar_pontos(_nome_dia = "", _indice_dia = 0) -> void:
 	var proxima := estado.obter_proxima_tarefa(relogio.minutos_atuais)
 	for ponto in locais.values():
 		ponto.definir_atividades(_atividades_para_local(ponto.tipo_local))
-		ponto.destacar_como_proxima(ponto.atividade_atual != null and proxima != null and ponto.atividade_atual.id == proxima.id)
+
+		var contem_proxima := false
+
+		if proxima != null:
+			for atividade in ponto.atividades_disponiveis:
+				if atividade.id == proxima.id:
+					contem_proxima = true
+					break
+
+		ponto.destacar_como_proxima(contem_proxima)
+
 		if ponto.player_na_area != null:
 			if ponto.atividade_atual != null:
 				ponto.mostrar_atividade_atual()
 			else:
-				ponto.hud.mostrar_interacao("Indisponível", "Não há atividade viável aqui agora. Consulte a agenda para o próximo prazo.")
+				ponto.hud.mostrar_interacao(
+					"Indisponível",
+					"Não há atividade viável aqui agora.\nConsulte a agenda para o próximo prazo.",
+					false
+					)
 
 func _atividades_para_local(local: String) -> Array[Atividade]:
 	var disponiveis: Array[Atividade] = []

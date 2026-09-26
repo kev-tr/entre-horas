@@ -9,6 +9,10 @@ signal agenda_alterada
 signal partida_encerrada(vitoria: bool, mensagem: String)
 signal prazo_perdido(atividade: Atividade)
 signal sintoma_alterado(ativo: bool, mensagem: String)
+signal rendimento_reduzido_energia
+signal rendimento_reduzido_saude_mental
+signal energia_esgotada
+signal saude_mental_esgotada
 
 const DIAS := ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira"]
 const META_PRODUTIVIDADE := 8
@@ -16,6 +20,10 @@ const META_PRODUTIVIDADE := 8
 var produtividade := 3
 var energia := 7
 var saude_mental := 7
+var energia_minima := 6
+var saude_mental_minima := 6
+var dias_com_energia_critica: int = 0
+var energia_critica_registrada_no_dia := false
 var indice_dia := 0
 var itens: Array[String] = []
 var atividades_concluidas: Dictionary = {}
@@ -26,26 +34,34 @@ var resultado_final := false
 var em_esgotamento := false
 var ultima_avaliacao: Dictionary = {}
 var cadeias_diarias: Dictionary = {}
+var rendimento_energia_notificado := false
+var rendimento_saude_mental_notificado := false
 
 const POOL_CADEIA := [
-	{"nome": "Organizar prioridades", "local": "Empresa", "descricao": "Reordene as entregas para manter o projeto em movimento.", "p": 2, "e": -2, "s": -1},
-	{"nome": "Retorno médico", "local": "Clínica", "descricao": "Uma conversa de cuidado ajuda a sustentar a rotina.", "p": 1, "e": -1, "s": 2},
-	{"nome": "Resolver pendencia", "local": "Banco", "descricao": "Regularize uma pendencia financeira e alivie a pressao.", "p": 1, "e": 1, "s": 1},
-	{"nome": "Pesquisa orientada", "local": "Biblioteca", "descricao": "Busque referencias para tomar uma decisao melhor.", "p": 2, "e": -1, "s": 1},
-	{"nome": "Caminhada de planejamento", "local": "Parque", "descricao": "Organize as proximas decisoes enquanto recupera o folego.", "p": 1, "e": -1, "s": 2},
-	{"nome": "Almoço com cliente", "local": "Restaurante Saudável", "descricao": "Uma conversa profissional durante a refeição abre caminhos.", "p": 1, "e": 1, "s": 1}
+	{"nome": "Organizar prioridades", "local": "Empresa", "descricao": "Reordene as entregas para manter o projeto em movimento.", "p": 1, "e": -2, "s": -1},
+	{"nome": "Exame de rotina", "local": "Clínica", "descricao": "Cuidar de sua saúde ajuda a sustentar a rotina.", "p": 0, "e": -1, "s": 1},
+	{"nome": "Resolver pendencia", "local": "Banco", "descricao": "Regularize uma pendencia financeira e alivie a pressao.", "p": 1, "e": -1, "s": 1},
+	{"nome": "Pesquisa orientada", "local": "Biblioteca", "descricao": "Busque referencias para tomar uma decisao melhor.", "p": 2, "e": -1, "s": -1},
+	{"nome": "Caminhada de planejamento", "local": "Parque", "descricao": "Organize as proximas decisoes enquanto recupera o folego.", "p": 1, "e": -1, "s": 1},
+	{"nome": "Almoço com cliente", "local": "Restaurante Saudável", "descricao": "Uma conversa profissional durante a refeição abre caminhos.", "p": 1, "e": 0, "s": -1}
 ]
 
 func iniciar_partida() -> void:
 	produtividade = 3
 	energia = 6
 	saude_mental = 6
+	energia_minima = energia
+	saude_mental_minima = saude_mental
+	dias_com_energia_critica = 0
+	energia_critica_registrada_no_dia = false
 	indice_dia = 0
 	itens.clear()
 	atividades_concluidas.clear()
 	tarefas_perdidas.clear()
 	grupos_escolhidos.clear()
 	cadeias_diarias.clear()
+	rendimento_energia_notificado = false
+	rendimento_saude_mental_notificado = false
 	_sortear_cadeia_do_dia()
 	iniciado = true
 	em_esgotamento = false
@@ -94,22 +110,57 @@ func aplicar_atividade(atividade: Atividade) -> bool:
 	atividades_concluidas[atividade.id] = true
 	if atividade.grupo_escolha != "":
 		grupos_escolhidos[atividade.grupo_escolha] = true
-	alterar_atributos(atividade.produtividade, atividade.energia, atividade.saude_mental)
-	inventario_alterado.emit(itens)
+	
+	if atividade.id.begins_with("trabalhar_"):
+		var ganho_produtividade := _calcular_produtividade_trabalho()
+		alterar_atributos(ganho_produtividade, atividade.energia, atividade.saude_mental)
+	else:
+		alterar_atributos(atividade.produtividade, atividade.energia, atividade.saude_mental)
+		inventario_alterado.emit(itens)
 	agenda_alterada.emit()
+	
 	var texto := atividade.descricao
 	if atividade.item_concedido != "":
 		texto += "\nItem recebido: %s." % atividade.item_concedido
-	notificacao_recebida.emit(atividade.nome, texto)
+	if not atividade.id.begins_with("trabalhar_"):
+		notificacao_recebida.emit(atividade.nome, texto)
 	_notificar_tarefas_reveladas(atividade.id)
 	return true
+
+func _calcular_produtividade_trabalho() -> int:
+	if energia <= 2 or saude_mental <= 2:
+		return 0
+
+	if energia <= 5 or saude_mental <= 5:
+		if energia <= 5 and not rendimento_energia_notificado:
+			rendimento_energia_notificado = true
+			rendimento_reduzido_energia.emit()
+		elif saude_mental <= 5 and not rendimento_saude_mental_notificado:
+			rendimento_saude_mental_notificado = true
+			rendimento_reduzido_saude_mental.emit()
+
+		return 1
+
+	return 2
 
 func alterar_atributos(p: int, e: int, s: int) -> void:
 	produtividade = clampi(produtividade + p, 0, 10)
 	energia = clampi(energia + e, 0, 10)
 	saude_mental = clampi(saude_mental + s, 0, 10)
+	
+	energia_minima = mini(energia_minima, energia)
+	saude_mental_minima = mini(saude_mental_minima, saude_mental)
+	if energia <= 2 and not energia_critica_registrada_no_dia:
+		dias_com_energia_critica += 1
+		energia_critica_registrada_no_dia = true
+	
 	atributos_alterados.emit(produtividade, energia, saude_mental)
 	_avaliar_esgotamento()
+
+	if saude_mental == 0:
+		saude_mental_esgotada.emit()
+	elif energia == 0:
+		energia_esgotada.emit()
 
 func verificar_prazos(minutos_do_dia: float) -> void:
 	if not iniciado:
@@ -146,6 +197,7 @@ func encerrar_dia_automatico() -> void:
 	alterar_atributos(0, 1, 0)
 
 func avancar_dia(mensagem: String) -> void:
+	energia_critica_registrada_no_dia = false
 	if indice_dia == DIAS.size() - 1:
 		finalizar_semana()
 		return
@@ -157,15 +209,58 @@ func avancar_dia(mensagem: String) -> void:
 
 func finalizar_semana() -> void:
 	iniciado = false
-	var vitoria := produtividade >= META_PRODUTIVIDADE and energia >= 1 and saude_mental >= 1
+	
+	var houve_desgaste := saude_mental_minima <= 2 or dias_com_energia_critica >= 3
+	var vitoria := produtividade >= META_PRODUTIVIDADE and not houve_desgaste
+	
 	resultado_final = vitoria
 	ultima_avaliacao = obter_avaliacao(vitoria)
-	var mensagem := "Semana concluída! Produtividade %d/10, Energia %d/10, Saúde Mental %d/10." % [produtividade, energia, saude_mental]
-	if vitoria:
-		mensagem += " Você encontrou um ritmo sustentável."
-	else:
-		mensagem += " Para vencer, alcance Produtividade 8 e mantenha Energia e Saúde Mental acima de zero."
+	
+	var mensagem := "Semana concluída! Produtividade %d/10, Energia %d/10, Saúde Mental %d/10.\n\n%s" % [
+		produtividade,
+		energia,
+		saude_mental,
+		ultima_avaliacao["orientacao"]
+	]
+
 	partida_encerrada.emit(vitoria, mensagem)
+
+func finalizar_por_saude_mental() -> void:
+	iniciado = false
+	resultado_final = false
+
+	ultima_avaliacao = {
+		"vitoria": false,
+		"feitas": atividades_concluidas.size(),
+		"perdidas": tarefas_perdidas.size(),
+		"decisoes": grupos_escolhidos.size(),
+		"pontuacao": produtividade + energia + saude_mental,
+		"produtividade": produtividade,
+		"energia": energia,
+		"saude_mental": saude_mental,
+		"energia_minima": energia_minima,
+		"saude_mental_minima": saude_mental_minima,
+		"dias_com_energia_critica": dias_com_energia_critica,
+		"orientacao": "A Saúde Mental chegou a zero."
+	}
+	
+	var mensagem := "A partida foi encerrada porque sua Saúde Mental chegou a zero."
+	partida_encerrada.emit(false, mensagem)
+
+func _obter_orientacao_final() -> String:
+	var produtividade_ok := produtividade >= META_PRODUTIVIDADE
+	var houve_desgaste := saude_mental_minima <= 2 or dias_com_energia_critica >= 3
+
+	if produtividade_ok and not houve_desgaste:
+		return "Você conseguiu cumprir seus objetivos sem chegar a níveis críticos de desgaste durante a semana."
+
+	if produtividade_ok:
+		return "Você alcançou seus objetivos profissionais, mas chegou a níveis críticos de Energia ou Saúde Mental durante a semana. Resultados também precisam ser sustentáveis."
+
+	if not houve_desgaste:
+		return "Você preservou seu bem-estar, mas parte dos objetivos profissionais ficou para trás. Organizar prioridades e estabelecer metas possíveis também faz parte do equilíbrio."
+
+	return "A semana terminou com objetivos pendentes e momentos de desgaste intenso. Busque equilibrar responsabilidades, descanso e atividades que favoreçam seu bem-estar."
 
 func obter_avaliacao(vitoria := resultado_final) -> Dictionary:
 	return {
@@ -177,7 +272,10 @@ func obter_avaliacao(vitoria := resultado_final) -> Dictionary:
 		"produtividade": produtividade,
 		"energia": energia,
 		"saude_mental": saude_mental,
-		"orientacao": "Ritmo sustentavel." if vitoria else "Revise prazos e recupere seus atributos."
+		"energia_minima": energia_minima,
+		"saude_mental_minima": saude_mental_minima,
+		"dias_com_energia_critica": dias_com_energia_critica,
+		"orientacao": _obter_orientacao_final()
 	}
 
 func obter_atividades() -> Array[Atividade]:
@@ -185,23 +283,71 @@ func obter_atividades() -> Array[Atividade]:
 	var atividades: Array[Atividade] = [
 		Atividade.criar("almoco_%d" % dia, "Almoço", "Restaurante Saudável", "Uma refeição equilibrada recupera seu ritmo.", 45, 0, 2, 1, 11, 14),
 		Atividade.criar("lanche_%d" % dia, "Lanche", "Fast Food", "Uma solução rápida para a fome.", 30, 0, 1, 0, 10, 22),
-		Atividade.criar("caminhar_%d" % dia, "Caminhar", "Parque", "Um intervalo para respirar e reorganizar os pensamentos.", 45, 0, -1, 2, 8, 17),
+		Atividade.criar("caminhar_%d" % dia, "Caminhar", "Parque", "Um intervalo para respirar e reorganizar os pensamentos.", 45, 0, -1, 1, 8, 17),
 		Atividade.criar("correr_%d" % dia, "Correr", "Parque", "Movimento intenso para aliviar a pressão.", 45, 0, -2, 2, 17, 21),
 		Atividade.criar("amigos_%d" % dia, "Encontrar amigos", "Parque", "Conexão também faz parte da rotina.", 60, 0, -1, 2, 17, 22),
 		Atividade.criar("dormir_%d" % dia, "Dormir", "Casa", "Encerre o dia e recupere parte das forças.", 1, 0, 0, 0, 20, 24)
 	]
-	atividades.append(Atividade.criar("estudar_%d" % dia, "Estudar em silencio", "Biblioteca", "Um tempo tranquilo para organizar os pensamentos.", 35, 0, -1, 2, 9, 17))
-	atividades.append(Atividade.criar("financas_%d" % dia, "Organizar financas", "Banco", "Planejar as contas reduz a pressao da semana.", 25, 0, 1, 1, 9, 16))
+	atividades.append(Atividade.criar("estudar_%d" % dia, "Estudar em silencio", "Biblioteca", "Um tempo tranquilo para organizar os pensamentos.", 35, 0, -1, 1, 9, 17))
+	atividades.append(Atividade.criar("financas_%d" % dia, "Organizar financas", "Banco", "Planejar as contas reduz a pressao da semana.", 25, 0, -1, 1, 9, 16))
+	
+	for hora in range(8, 23, 2):
+		atividades.append(
+			Atividade.criar(
+				"trabalhar_%d_%d" % [dia, hora],
+				"Trabalhar",
+				"Empresa",
+				"Avance nas tarefas profissionais. Seu rendimento depende de como você está se sentindo.",
+				30,
+				2,
+				-1,
+				-1,
+				hora,
+				hora + 2
+			)
+		)
+	
+	for hora in range(8, 23, 3):
+		atividades.append(
+			Atividade.criar(
+				"assistir_serie_%d_%d" % [dia, hora],
+				"Assistir série",
+				"Casa",
+				"Desacelere um pouco e aproveite um momento de lazer.",
+				30,
+				-1,
+				-1,
+				1,
+				hora,
+				min(hora + 3, 24)
+			)
+		)
+		
+	atividades.append(
+	Atividade.criar(
+		"descansar_%d" % dia,
+		"Descansar",
+		"Casa",
+		"Faça uma pausa para recuperar as forças e aliviar o desgaste.",
+		45,
+		0,
+		2,
+		1,
+		8,
+		20
+		)
+	)
+	
 	match dia:
-		0: atividades.append(Atividade.criar("relatorio", "Relatório", "Empresa", "Um avanço importante no projeto da semana.", 60, 2, -3, -2, 9, 17, "", false, "", false, true))
+		0: atividades.append(Atividade.criar("relatorio", "Relatório", "Empresa", "Um avanço importante no projeto da semana.", 60, 2, -2, -2, 9, 17, "", false, "", false, true))
 		1:
 			atividades.append(Atividade.criar("consulta", "Consulta", "Clínica", "A consulta ajuda você a cuidar de si.", 60, 0, -1, 1, 9, 17, "", false, "Receita", false, true))
-			atividades.append(Atividade.criar("remedio", "Retirar remédio", "Farmácia", "Com o tratamento em dia, o peso da semana diminui.", 15, 0, 1, 2, 10, 20, "Receita", true, "", false, true))
-			atividades.append(Atividade.criar("hora_extra", "Hora extra", "Empresa", "Você ganha visibilidade, mas sacrifica seu descanso.", 90, 3, -4, -3, 15, 17, "", false, "", true, true, "decisao_tarde"))
+			atividades.append(Atividade.criar("remedio", "Retirar remédio", "Farmácia", "Com o tratamento em dia, o peso da semana diminui.", 15, 0, 1, 1, 10, 20, "Receita", true, "", false, true))
+			atividades.append(Atividade.criar("hora_extra", "Hora extra", "Empresa", "Você ganha visibilidade, mas sacrifica seu descanso.", 90, 3, -2, -3, 15, 17, "", false, "", true, true, "decisao_tarde"))
 			atividades.append(Atividade.criar("tempo_pessoal", "Proteger seu tempo", "Empresa", "Você recusa a hora extra e preserva seu equilíbrio.", 30, 0, 0, 2, 15, 17, "", false, "", true, true, "decisao_tarde"))
-		2: atividades.append(Atividade.criar("reuniao", "Reunião urgente", "Empresa", "Evento especial: sua presença é necessária agora.", 90, 2, -3, -2, 10, 16, "", false, "", true, true))
+		2: atividades.append(Atividade.criar("reuniao", "Reunião urgente", "Empresa", "Evento especial: sua presença é necessária agora.", 90, 2, -2, -2, 10, 16, "", false, "", true, true))
 		3: atividades.append(Atividade.criar("plano", "Plano de carreira", "Empresa", "Você transforma esforço em direção profissional.", 60, 2, -3, -2, 9, 17, "", false, "", false, true))
-		4: atividades.append(Atividade.criar("entrega", "Entrega final", "Empresa", "A entrega fecha os compromissos da semana.", 90, 1, -3, -2, 10, 17, "", false, "", true, true))
+		4: atividades.append(Atividade.criar("entrega", "Entrega final", "Empresa", "A entrega fecha os compromissos da semana.", 90, 2, -3, -2, 10, 17, "", false, "", true, true))
 	if dia == 0:
 		atividades.append(Atividade.criar("revisao_relatorio", "Revisar relatorio", "Empresa", "A gerente pediu ajustes antes da reuniao de equipe.", 20, 1, -2, -1, 10, 17, "", false, "", true, true))
 	elif dia == 2:
@@ -213,7 +359,7 @@ func obter_atividades() -> Array[Atividade]:
 	for atividade in atividades:
 		if atividade.id in ["relatorio", "consulta", "remedio", "hora_extra", "tempo_pessoal", "reuniao", "plano", "entrega", "revisao_relatorio", "ata_reuniao", "alinhamento", "apresentacao"]:
 			atividade.atividade_precedente = "_legado"
-	atividades.append(Atividade.criar("respirar_%d" % dia, "Respirar no parque", "Parque", "Uma pausa ao ar livre recupera sua Saude Mental.", 20, 0, 0, 2, 8, 24))
+	atividades.append(Atividade.criar("respirar_%d" % dia, "Respirar no parque", "Parque", "Uma pausa ao ar livre recupera sua Saude Mental.", 20, 0, 0, 1, 8, 24))
 	atividades.append_array(_criar_tarefas_da_cadeia(dia))
 	return atividades
 
@@ -259,25 +405,20 @@ func obter_tarefas_da_agenda() -> Array[Atividade]:
 
 func obter_proxima_tarefa(minutos_do_dia := 0.0) -> Atividade:
 	var proxima: Atividade = null
+
 	for atividade in obter_atividades():
-		if atividade.id.begins_with("cadeia_"):
-			if not atividade_revelada(atividade) or atividade_bloqueada(atividade):
-				continue
-			if minutos_do_dia >= atividade.hora_inicio * 60:
-				continue
-			if proxima == null or atividade.hora_inicio < proxima.hora_inicio:
-				proxima = atividade
+		if not atividade.id.begins_with("cadeia_"):
 			continue
-		if not atividade_revelada(atividade):
+
+		if not atividade_revelada(atividade) or atividade_bloqueada(atividade):
 			continue
-		if atividade.local == "Biblioteca" or atividade.local == "Banco":
+
+		if minutos_do_dia >= atividade.hora_inicio * 60:
 			continue
-		if atividade.local in ["Casa", "Restaurante Saudável", "Fast Food", "Parque"] or atividade_bloqueada(atividade):
-			continue
-		if atividade.usa_hora_inicio_como_prazo and minutos_do_dia >= atividade.hora_inicio * 60:
-			continue
+
 		if proxima == null or atividade.hora_inicio < proxima.hora_inicio:
 			proxima = atividade
+
 	return proxima
 
 func atividade_bloqueada(atividade: Atividade) -> bool:

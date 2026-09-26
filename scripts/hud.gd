@@ -27,7 +27,7 @@ const COR_ACENTO := Color("F6C453")
 @onready var painel_interacao: Control = $PainelInteracao
 @onready var label_atividade: Label = $PainelInteracao/VBoxContainer/LabelAtividade
 @onready var label_instrucao: Label = $PainelInteracao/VBoxContainer/LabelInstrucao
-
+@onready var relogio = $"../Relogio"
 @onready var label_dia: Label = $PainelDia/HBoxContainer/LabelDia
 
 @onready var agenda_painel: PanelContainer = $PainelAgenda
@@ -48,6 +48,17 @@ var tutorial: PanelContainer
 var tutorial_titulo: Label
 var tutorial_texto: Label
 var tutorial_botao: Button
+var tutorial_espaco_mostrado := false
+var tutorial_tab_mostrado := false
+var notificacao_estava_visivel := false
+var tutorial_cansaco_mostrado := false
+var tutorial_saude_mental_mostrado := false
+var tutorial_noite_mostrado := false
+var tutorial_rendimento_energia_mostrado := false
+var tutorial_rendimento_saude_mental_mostrado := false
+var tutorial_produtividade_baixa_mostrado := false
+var tutorial_prazo_perdido_mostrado := false
+
 
 var overlay: ColorRect
 var overlay_caixa: VBoxContainer
@@ -119,9 +130,14 @@ func atualizar_relogio(horario: String) -> void:
 		minutos_do_dia = partes[0].to_int() * 60 + partes[1].to_int()
 		_atualizar_agenda()
 
-func mostrar_interacao(nome_atividade: String, descricao := "") -> void:
+func mostrar_interacao(nome_atividade: String, descricao := "", pode_realizar := true) -> void:
 	label_atividade.text = nome_atividade
-	label_instrucao.text = (descricao + "\n" if descricao != "" else "") + "[ESPAÇO] realizar"
+
+	if pode_realizar:
+		label_instrucao.text = (descricao + "\n" if descricao != "" else "") + "[ESPAÇO] realizar"
+	else:
+		label_instrucao.text = descricao
+
 	painel_interacao.visible = true
 
 func esconder_interacao() -> void:
@@ -252,9 +268,16 @@ func _adicionar_botao_retomar() -> void:
 	retomar.pressed.connect(func(): retomar_solicitado.emit())
 	overlay_caixa.add_child(retomar)
 
-func mostrar_resultado(vitoria: bool, mensagem: String) -> void:
-	_montar_overlay("SEMANA CONCLUÍDA" if vitoria else "SEMANA DIFÍCIL", mensagem, "JOGAR NOVAMENTE", func(): reiniciar_solicitado.emit(), "", "")
-
+func mostrar_resultado(titulo: String, mensagem: String) -> void:
+	_montar_overlay(
+		titulo,
+		mensagem,
+		"JOGAR NOVAMENTE",
+		func(): reiniciar_solicitado.emit(),
+		"",
+		""
+	)
+	
 func mostrar_fim_do_dia() -> void:
 	_montar_overlay(
 		"FIM DO DIA",
@@ -383,7 +406,7 @@ func _criar_interface_semana() -> void:
 	overlay_caixa.add_theme_constant_override("separation", 18)
 	centro.add_child(overlay_caixa)
 	
-		# Caixa central usada pelo tutorial inicial
+	# Caixa central usada pelo tutorial inicial
 	tutorial = PanelContainer.new()
 	tutorial.custom_minimum_size = Vector2(500, 0)
 	tutorial.add_theme_stylebox_override("panel", _cartao(COR_ACENTO))
@@ -443,13 +466,164 @@ func _montar_overlay(titulo: String, texto: String, acao: String, callback: Call
 	overlay_caixa.add_child(botao)
 	overlay.visible = true
 
+func deve_mostrar_tutorial_espaco(indice_dia: int) -> bool:
+	return indice_dia == 0 and not tutorial_espaco_mostrado
+
+
+func deve_mostrar_tutorial_tab(indice_dia: int) -> bool:
+	return indice_dia == 0 and tutorial_espaco_mostrado and not tutorial_tab_mostrado
+
+func _mostrar_tutorial_contextual(titulo: String, texto: String) -> void:
+	relogio.parar_dia()
+	get_tree().paused = true
+
+	tutorial_titulo.text = titulo
+	tutorial_texto.text = texto
+	tutorial_botao.text = "ENTENDI"
+
+	_limpar_conexoes_botao_tutorial()
+
+	tutorial_botao.pressed.connect(
+		func():
+			tutorial.visible = false
+			notificacao.visible = notificacao_estava_visivel
+			relogio.retomar_dia(relogio.minutos_atuais)
+			get_tree().paused = false
+	)
+
+	notificacao_estava_visivel = notificacao.visible
+	notificacao.visible = false
+	tutorial.visible = true
+
+func mostrar_tutorial_espaco() -> void:
+	tutorial_espaco_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"REALIZANDO ATIVIDADES",
+		"Você chegou a um local com uma atividade disponível.\nPressione ESPAÇO para realizá-la."
+	)
+
+func mostrar_tutorial_tab() -> void:
+	tutorial_tab_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"MAIS DE UMA OPÇÃO",
+		"Alguns locais oferecem mais de uma atividade.\nPressione TAB para alternar entre as opções."
+	)
+
+func mostrar_tutorial_prazo_perdido() -> void:
+	if tutorial_prazo_perdido_mostrado:
+		return
+
+	tutorial_prazo_perdido_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"VOCÊ PERDEU UM PRAZO",
+		"Uma atividade da sua agenda não foi concluída a tempo.\n\n" +
+		"Perder um prazo reduz sua Produtividade em 1 e sua Saúde Mental em 1.\n\n" +
+		"Acompanhe a agenda e o marcador ! no mapa para identificar sua próxima atividade. Nem sempre será possível fazer tudo: organizar prioridades também faz parte de uma rotina mais equilibrada."
+	)
+
+func mostrar_tutorial_cansaco() -> void:
+	if tutorial_cansaco_mostrado:
+		return
+
+	tutorial_cansaco_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"VOCÊ ESTÁ CANSADO",
+		"Sua Energia está baixa e seu personagem está se movendo mais devagar.\nProcure atividades que recuperem Energia para retomar seu ritmo."
+	)
+
+
+func mostrar_tutorial_saude_mental() -> void:
+	if tutorial_saude_mental_mostrado:
+		return
+
+	tutorial_saude_mental_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"CUIDE DA SUA SAÚDE MENTAL",
+		"Sua Saúde Mental está baixa e seu ritmo foi afetado.\nFadiga e cansaço excessivo, físico e mental, estão entre os sinais associados ao esgotamento profissional.\nProcure atividades que ajudem a recuperar seu equilíbrio."
+	)
+
+
+func mostrar_tutorial_noite() -> void:
+	if tutorial_noite_mostrado:
+		return
+
+	tutorial_noite_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"HORA DE DESCANSAR?",
+		"Já são 20h. A partir de agora, você pode voltar para casa e dormir para encerrar o dia.\nMas ainda há tempo: talvez valha a pena realizar outras atividades antes de descansar."
+	)
+
+func mostrar_tutorial_rendimento_energia() -> void:
+	if tutorial_rendimento_energia_mostrado:
+		return
+
+	tutorial_rendimento_energia_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"CANSAÇO AFETA SEU RENDIMENTO",
+		"Sua Energia está mais baixa e seu rendimento no trabalho foi reduzido.\nRecuperar Energia pode ajudar você a voltar a produzir melhor."
+	)
+
+func mostrar_tutorial_rendimento_saude_mental() -> void:
+	if tutorial_rendimento_saude_mental_mostrado:
+		return
+
+	tutorial_rendimento_saude_mental_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"SAÚDE MENTAL AFETA SEU RENDIMENTO",
+		"Sua Saúde Mental está mais baixa e seu rendimento no trabalho foi reduzido.\nCuidar desse indicador também ajuda a sustentar seu desempenho."
+	)
+
+func mostrar_tutorial_produtividade_baixa() -> void:
+	if tutorial_produtividade_baixa_mostrado:
+		return
+
+	tutorial_produtividade_baixa_mostrado = true
+
+	_mostrar_tutorial_contextual(
+		"ATENÇÃO AO EQUILÍBRIO",
+		"Sua Produtividade está baixa. Deixar suas responsabilidades de lado pode comprometer seus objetivos.\nMas produtividade não é tudo: atividades de lazer, momentos fora da rotina e atividade física também ajudam a cuidar do bem-estar.\nBusque equilíbrio entre suas responsabilidades e sua saúde."
+	)
+
+func mostrar_energia_esgotada(callback: Callable) -> void:
+	relogio.parar_dia()
+	get_tree().paused = true
+
+	tutorial_titulo.text = "VOCÊ SE ESGOTOU"
+	tutorial_texto.text = "Sua Energia chegou a zero e você não conseguiu continuar as atividades do dia.\n\nO descanso adequado é importante para recuperar as forças e manter uma rotina mais equilibrada. Você precisará encerrar o dia e descansar."
+	tutorial_botao.text = "ENCERRAR O DIA"
+
+	_limpar_conexoes_botao_tutorial()
+
+	notificacao_estava_visivel = notificacao.visible
+	notificacao.visible = false
+	tutorial.visible = true
+
+	tutorial_botao.pressed.connect(
+		func():
+			tutorial.visible = false
+			notificacao.visible = notificacao_estava_visivel
+			get_tree().paused = false
+			callback.call()
+	)
+
+func _limpar_conexoes_botao_tutorial() -> void:
+	for conexao in tutorial_botao.pressed.get_connections():
+		tutorial_botao.pressed.disconnect(conexao.callable)
+
 func mostrar_tutorial_inicial(ao_concluir: Callable) -> void:
 	_mostrar_passo_tutorial(0, ao_concluir)
 
 
 func _mostrar_passo_tutorial(passo: int, ao_concluir: Callable) -> void:
-	for conexao in tutorial_botao.pressed.get_connections():
-		tutorial_botao.pressed.disconnect(conexao.callable)
+	_limpar_conexoes_botao_tutorial()
 
 	match passo:
 		0:
@@ -470,7 +644,7 @@ func _mostrar_passo_tutorial(passo: int, ao_concluir: Callable) -> void:
 
 		2:
 			tutorial_titulo.text = "FIQUE DE OLHO NA AGENDA"
-			tutorial_texto.text = "Atividades com prazo aparecem na agenda. Vá ao local indicado antes do horário limite."
+			tutorial_texto.text = "Atividades com prazo aparecem na agenda. Vá ao local indicado antes do horário limite.\nUm ! sobre o local indica onde está sua próxima atividade da agenda."
 			tutorial_botao.text = "PRÓXIMO"
 			tutorial_botao.pressed.connect(
 				func(): _mostrar_passo_tutorial(3, ao_concluir)
@@ -496,6 +670,36 @@ func mostrar_pausa() -> void:
 	reiniciar.custom_minimum_size = Vector2(0, 44)
 	reiniciar.pressed.connect(func(): reiniciar_solicitado.emit())
 	overlay_caixa.add_child(reiniciar)
+
+func mostrar_saude_mental_esgotada(callback: Callable) -> void:
+	relogio.parar_dia()
+	get_tree().paused = true
+
+	tutorial_titulo.text = "ESGOTAMENTO GRAVE"
+
+	tutorial_texto.text = (
+		"Sua Saúde Mental chegou a zero. O personagem chegou a um estado grave de esgotamento e não conseguiu sustentar sua rotina.\n\n" +
+		"Cansaço excessivo, dificuldades de concentração, alterações de humor, insônia e isolamento estão entre os sinais que podem estar associados à Síndrome de Burnout.\n\n" +
+		"Na vida real, esses sinais não representam, por si só, um diagnóstico. Se forem persistentes, procure apoio profissional.\n\n" +
+		"Para prevenção, busque equilíbrio entre trabalho e vida pessoal: estabeleça objetivos possíveis, reserve tempo para lazer, pratique atividade física, converse com pessoas de confiança e descanse adequadamente.\n\n" +
+		"Fonte: Ministério da Saúde — Síndrome de Burnout.\n"+
+		"https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout"
+	)
+
+	tutorial_botao.text = "ENTENDI"
+
+	_limpar_conexoes_botao_tutorial()
+
+	notificacao_estava_visivel = notificacao.visible
+	notificacao.visible = false
+	tutorial.visible = true
+
+	tutorial_botao.pressed.connect(
+		func():
+			tutorial.visible = false
+			notificacao.visible = false
+			callback.call()
+	)
 
 func esconder_pausa() -> void:
 	pausado = false
